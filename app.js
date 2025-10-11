@@ -1,4 +1,4 @@
-// app.js (Redesigned UI: Clean modern card with soft pastel colors, improved responsiveness, fixed zoom issues by optimizing sizes and viewport)
+// app.js (Advanced Unique UI: Double-sided 3D flip card with holographic glow, neon dark theme, center scale popup with glow)
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -39,176 +39,177 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // New HTML template: Modern card design with pastel colors, subtle shadows, no forced zoom (optimized for fit), new animations (fade-slide for elements)
+    // New HTML template: Neon dark theme, double-sided 3D flip card (front: thumbnail + basic info; back: buttons + details), holographic glow, center scale popup
     const html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <!-- Prevent user zoom, ensure fit -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>${class_name}</title>
         <style>
           body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh; /* Ensure full height without zoom out */
+            min-height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #e0f7fa, #b2ebf2); /* Soft pastel blue gradient */
-            color: #424242;
-            perspective: 800px;
-            overflow-y: auto; /* Allow scroll if needed, no overflow hidden */
+            background: linear-gradient(135deg, #121212, #1e1e1e); /* Dark neon theme */
+            color: #ffffff;
+            perspective: 1200px;
           }
-          .container {
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transform-style: preserve-3d;
-            transform: rotateX(2deg) rotateY(2deg);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+          .card-container {
+            position: relative;
             width: 90%;
-            max-width: 450px;
-            margin: 20px; /* Add margin for better centering without zoom */
-            animation: fadeSlideIn 1s ease forwards; /* New fade-slide animation */
+            max-width: 400px;
+            height: 500px; /* Fixed height for flip */
+            transform-style: preserve-3d;
+            transition: transform 0.8s ease;
+            margin: 20px;
           }
-          .container:hover {
-            transform: rotateX(0deg) rotateY(0deg);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+          .card-container:hover {
+            transform: rotateY(180deg); /* Flip on hover */
           }
-          @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(50px) rotateX(2deg) rotateY(2deg); }
-            to { opacity: 1; transform: translateY(0) rotateX(2deg) rotateY(2deg); }
+          .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            box-sizing: border-box;
+            border-radius: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3); /* Holographic glow */
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+          }
+          .card-front {
+            transform: rotateY(0deg);
+          }
+          .card-back {
+            transform: rotateY(180deg);
+            background: rgba(255, 255, 255, 0.1);
+          }
+          .card-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0,255,255,0.2), rgba(255,0,255,0.2));
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: -1;
+          }
+          .card-container:hover::before {
+            opacity: 1; /* Holographic shimmer on hover */
           }
           .thumbnail {
-            width: 140px;
-            height: 140px;
+            width: 150px;
+            height: 150px;
             border-radius: 50%;
-            border: 4px solid #81d4fa; /* Pastel blue border */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transform: translateZ(40px);
-            transition: transform 0.3s ease;
-            animation: gentleFloat 3s infinite ease-in-out; /* New gentle float animation */
+            border: 3px solid #00ffff; /* Neon cyan */
+            box-shadow: 0 0 10px #00ffff;
+            transform: translateZ(50px);
+            animation: glowPulse 2s infinite alternate;
           }
-          .thumbnail:hover {
-            transform: translateZ(60px) scale(1.05);
-          }
-          @keyframes gentleFloat {
-            0%, 100% { transform: translateZ(40px) translateY(0); }
-            50% { transform: translateZ(40px) translateY(-5px); }
+          @keyframes glowPulse {
+            0% { box-shadow: 0 0 10px #00ffff; }
+            100% { box-shadow: 0 0 20px #00ffff; }
           }
           .label {
-            font-size: 1.2em;
-            font-weight: 600;
-            margin: 12px 0;
-            color: #0277bd; /* Deeper blue for text */
-            transform: translateZ(10px);
-            animation: textFadeIn 0.8s ease forwards 0.3s; /* Delayed fade-in */
-            opacity: 0;
-          }
-          button {
-            padding: 12px 24px;
-            margin: 8px 4px;
-            background: linear-gradient(135deg, #4fc3f7, #0288d1); /* Pastel to deep blue */
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 500;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
             transform: translateZ(20px);
           }
+          button {
+            padding: 12px 25px;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #ff00ff, #00ffff); /* Neon gradient */
+            color: #121212;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1em;
+            box-shadow: 0 0 10px #ff00ff;
+            transition: all 0.3s ease;
+            transform: translateZ(30px);
+          }
           button:hover {
-            background: linear-gradient(135deg, #0288d1, #4fc3f7);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 0 20px #ff00ff;
+            transform: translateZ(40px) scale(1.05);
           }
-          button:active {
-            transform: translateZ(15px) scale(0.98);
-          }
-          @keyframes textFadeIn {
-            from { opacity: 0; transform: translateZ(10px) translateX(-20px); }
-            to { opacity: 1; transform: translateZ(10px) translateX(0); }
-          }
-          /* Custom Popup: Slide from bottom with fade */
+          /* Center Scale Popup with Glow */
           .popup {
             position: fixed;
-            bottom: -100px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%) translateZ(50px) perspective(300px) rotateX(10deg);
-            background: rgba(255, 255, 255, 0.95);
-            color: #424242;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(18, 18, 18, 0.9);
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
             font-size: 1em;
             max-width: 80%;
             opacity: 0;
-            transition: opacity 0.3s ease;
-            border: 1px solid #81d4fa;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            z-index: 10;
           }
           .popup.show {
-            animation: bottomSlideInOut 2s ease forwards;
+            animation: scaleGlow 2s ease forwards;
           }
-          @keyframes bottomSlideInOut {
-            0% { bottom: -100px; opacity: 0; transform: translateX(-50%) translateZ(50px) rotateX(10deg); }
-            20% { bottom: 20px; opacity: 1; transform: translateX(-50%) translateZ(50px) rotateX(0deg); }
-            80% { bottom: 20px; opacity: 1; transform: translateX(-50%) translateZ(50px) rotateX(0deg); }
-            100% { bottom: -100px; opacity: 0; transform: translateX(-50%) translateZ(50px) rotateX(10deg); }
+          @keyframes scaleGlow {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; box-shadow: 0 0 0 rgba(0, 255, 255, 0); }
+            20% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 20px rgba(0, 255, 255, 0.7); }
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 20px rgba(0, 255, 255, 0.7); }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; box-shadow: 0 0 0 rgba(0, 255, 255, 0); }
           }
-          /* Responsive Design: Adjust for mobile/desktop */
+          /* Responsive Design */
           @media (max-width: 600px) {
-            body {
-              align-items: flex-start; /* Align to top on mobile to avoid zoom out */
-              padding-top: 20px;
-            }
-            .container {
-              padding: 20px;
-              width: 85%;
-              margin: 10px auto;
+            .card-container {
+              width: 95%;
+              height: 450px;
             }
             .thumbnail {
               width: 120px;
               height: 120px;
             }
             .label {
-              font-size: 1.1em;
+              font-size: 1em;
             }
             button {
               width: 100%;
-              margin: 8px 0;
-              padding: 10px;
-              font-size: 0.95em;
-            }
-            .popup {
-              max-width: 90%;
-              padding: 12px 20px;
-              font-size: 0.95em;
+              margin: 10px 0;
             }
           }
           @media (min-width: 601px) {
-            .container {
-              padding: 30px;
+            .card-container {
               width: 400px;
-            }
-            button {
-              width: auto;
-              padding: 12px 24px;
+              height: 500px;
             }
           }
         </style>
       </head>
       <body>
-        <div class="container">
-          <img class="thumbnail" src="${thumbnail}" alt="Teacher Thumbnail">
-          <div class="label">𝗧𝗲𝗮𝗰𝗵𝗲𝗿 - ${teacher_name}</div>
-          <div class="label">𝗖𝗹𝗮𝘀𝘀 𝗡𝗮𝗺𝗲 - ${class_name}</div>
-          <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 𝗖𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
-          <button onclick="handleDownload('${class_url}', 'class')">CLICK TO DOWNLOAD CLASS</button>
-          <button onclick="handleDownload('${slides_url}', 'slides')">CLICK TO DOWNLOAD SLIDES</button>
+        <div class="card-container">
+          <div class="card-front">
+            <img class="thumbnail" src="${thumbnail}" alt="Teacher Thumbnail">
+            <div class="label">𝗧𝗲𝗮𝗰𝗵𝗲𝗿 - ${teacher_name}</div>
+            <div class="label">𝗖𝗹𝗮𝘀𝘀 𝗡𝗮𝗺𝗲 - ${class_name}</div>
+          </div>
+          <div class="card-back">
+            <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 𝗖𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
+            <button onclick="handleDownload('${class_url}', 'class')">CLICK TO DOWNLOAD CLASS</button>
+            <button onclick="handleDownload('${slides_url}', 'slides')">CLICK TO DOWNLOAD SLIDES</button>
+          </div>
         </div>
         <div id="popup" class="popup"></div>
         <script>
