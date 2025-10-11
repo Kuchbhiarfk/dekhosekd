@@ -11,11 +11,13 @@ app.get('/op', (req, res) => {
       class_url,
       slides_url,
       is_offline,
-      live_at_time
+      live_at_time,
+      user_first_name,
+      user_id
     } = req.query;
 
     // Basic validation: ensure all params are provided
-    if (!class_name || !teacher_name || !thumbnail || !class_url || !slides_url || !live_at_time) {
+    if (!class_name || !teacher_name || !thumbnail || !class_url || !slides_url || !live_at_time || !user_first_name || !user_id) {
       return res.status(400).send('Missing required query parameters');
     }
 
@@ -38,13 +40,13 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // HTML template with fixed centering, no zoom in/out, and dynamic popup background
+    // HTML template with user details box, refined UI, and responsive design
     const html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <!-- Prevent zoom -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>${class_name}</title>
         <style>
           body {
@@ -74,7 +76,16 @@ app.get('/op', (req, res) => {
             animation: waveContainer 3s infinite ease-in-out;
           }
           .container:hover {
-            transform: rotateX(0deg) rotateY(0deg); /* No scale, just straighten */
+            transform: rotateX(0deg) rotateY(0deg);
+          }
+          .user-box {
+            background: linear-gradient(45deg, #4a148c, #7b1fa2); /* Different background */
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            transform: translateZ(30px);
+            animation: fadeIn 1.5s ease forwards;
           }
           @keyframes waveContainer {
             0%, 100% { transform: rotateX(5deg) rotateY(5deg) translateY(0); }
@@ -90,7 +101,7 @@ app.get('/op', (req, res) => {
             animation: bounceThumbnail 2s infinite ease-in-out;
           }
           .thumbnail:hover {
-            transform: translateZ(80px); /* No scale */
+            transform: translateZ(80px);
           }
           @keyframes bounceThumbnail {
             0%, 100% { transform: translateZ(60px) translateY(0); }
@@ -165,6 +176,10 @@ app.get('/op', (req, res) => {
               padding: 15px;
               max-width: 260px;
             }
+            .user-box {
+              padding: 10px;
+              margin-bottom: 15px;
+            }
             .thumbnail {
               width: 70px;
               height: 70px;
@@ -186,6 +201,10 @@ app.get('/op', (req, res) => {
       </head>
       <body>
         <div class="container">
+          <div class="user-box">
+            <div class="label">Name - ${user_first_name}</div>
+            <div class="label">User Id - ${user_id}</div>
+          </div>
           <img class="thumbnail" src="${thumbnail}" alt="Teacher Thumbnail">
           <div class="label">𝗧𝗲𝗮𝗰𝗵𝗲𝗿 - ${teacher_name}</div>
           <div class="label">𝗖𝗹𝗮𝘀𝘀 𝗡𝗮𝗺𝗲 - ${class_name}</div>
