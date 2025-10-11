@@ -1,9 +1,46 @@
 const express = require('express');
+const crypto = require('crypto');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Encryption settings
+const ENCRYPTION_KEY = Buffer.from('b7e2f4a9c8d3e6b1f0a2c5d7e9b4f1a3c6d8e0f2a4b5c7d9e1f0a3b6c8d4e2f', 'hex'); // 32 bytes
+const IV = Buffer.from('a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6', 'hex'); // 16 bytes
+
+// Encryption function
+function encrypt(text) {
+  const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, IV);
+  let encrypted = cipher.update(text, 'utf8', 'base64');
+  encrypted += cipher.final('base64');
+  return encrypted;
+}
+
+// Decryption function
+function decrypt(encrypted) {
+  const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, IV);
+  let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
 app.get('/op', (req, res) => {
   try {
+    // Expect encrypted data parameter
+    const { data } = req.query;
+    if (!data) {
+      return res.status(400).send('Missing encrypted data parameter');
+    }
+
+    // Decrypt and parse query parameters
+    let params;
+    try {
+      const decrypted = decrypt(data);
+      params = JSON.parse(decrypted);
+    } catch (error) {
+      console.error('Error decrypting data:', error);
+      return res.status(400).send('Invalid encrypted data');
+    }
+
     const {
       class_name,
       teacher_name,
@@ -15,7 +52,7 @@ app.get('/op', (req, res) => {
       user_first_name,
       user_id,
       made_at
-    } = req.query;
+    } = params;
 
     // Basic validation: ensure all params are provided
     if (!class_name || !teacher_name || !thumbnail || !class_url || !slides_url || !live_at_time || !user_first_name || !user_id || !made_at) {
@@ -367,7 +404,6 @@ app.get('/op', (req, res) => {
             80% { right: 10px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); }
             100% { right: -300px; opacity: 0; transform: translateY(-50%) translateZ(100px) rotateY(-20deg); }
           }
-          /* Responsive adjustments */
           @media (max-width: 600px) {
             .user-box {
               padding: 20px;
@@ -465,7 +501,7 @@ app.get('/op', (req, res) => {
 
 // Fallback route
 app.get('/', (req, res) => {
-  res.send('Welcome! Use /op with query params.');
+  res.send('Welcome! Use /op with encrypted data param.');
 });
 
 app.listen(port, () => {
