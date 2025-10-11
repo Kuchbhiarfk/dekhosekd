@@ -1,4 +1,3 @@
-// app.js (Updated with new date format and enhanced UI)
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,7 +19,26 @@ app.get('/op', (req, res) => {
       return res.status(400).send('Missing required query parameters');
     }
 
-    // HTML template with enhanced UI (advanced CSS for 3D effects, animations, gradients)
+    // Server-side date formatting
+    let formattedDate;
+    try {
+      const normalizedDateStr = live_at_time.replace(/\+00:00$/, 'Z');
+      const date = new Date(normalizedDateStr);
+      if (isNaN(date)) {
+        console.error(`Invalid date format: ${live_at_time}`);
+        formattedDate = live_at_time; // Fallback to raw string
+      } else {
+        const day = date.getDate();
+        const month = date.toLocaleString('en-US', { month: 'long' });
+        const year = date.getFullYear();
+        formattedDate = `${day}-${month}-${year}`;
+      }
+    } catch (error) {
+      console.error(`Error parsing date: ${live_at_time}`, error);
+      formattedDate = live_at_time; // Fallback to raw string
+    }
+
+    // HTML template with enhanced UI
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -38,7 +56,7 @@ app.get('/op', (req, res) => {
             margin: 0;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: white;
-            perspective: 1000px; /* Enable 3D space */
+            perspective: 1000px;
           }
           .container {
             text-align: center;
@@ -53,7 +71,7 @@ app.get('/op', (req, res) => {
             max-width: 400px;
           }
           .container:hover {
-            transform: rotateY(10deg) rotateX(5deg); /* 3D tilt on hover */
+            transform: rotateY(10deg) rotateX(5deg);
           }
           .thumbnail {
             width: 150px;
@@ -61,17 +79,17 @@ app.get('/op', (req, res) => {
             border-radius: 50%;
             border: 5px solid rgba(255, 255, 255, 0.8);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            transform: translateZ(50px); /* 3D pop-out effect */
+            transform: translateZ(50px);
             transition: transform 0.3s ease;
           }
           .thumbnail:hover {
-            transform: translateZ(80px) scale(1.1); /* Zoom on hover */
+            transform: translateZ(80px) scale(1.1);
           }
           h1 {
             font-size: 2em;
             margin: 15px 0 5px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            transform: translateZ(30px); /* 3D depth */
+            transform: translateZ(30px);
           }
           h2 {
             font-size: 1.5em;
@@ -96,7 +114,7 @@ app.get('/op', (req, res) => {
             font-size: 1em;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-            transform: translateZ(40px); /* 3D button pop */
+            transform: translateZ(40px);
           }
           button:hover {
             background: linear-gradient(135deg, #764ba2, #667eea);
@@ -117,30 +135,11 @@ app.get('/op', (req, res) => {
           <img class="thumbnail" src="${thumbnail}" alt="Teacher Thumbnail">
           <h1>${teacher_name}</h1>
           <h2>${class_name}</h2>
-          <p>${formatDate(live_at_time)}${is_offline === 'true' ? ' (Offline)' : ''}</p>
+          <p>${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</p>
           <button onclick="handleDownload('${class_url}', 'class')">CLICK TO DOWNLOAD CLASS</button>
           <button onclick="handleDownload('${slides_url}', 'slides')">CLICK TO DOWNLOAD SLIDES</button>
         </div>
         <script>
-          function formatDate(dateStr) {
-            try {
-              // Replace +00:00 with Z for consistent parsing
-              const normalizedDateStr = dateStr.replace(/\\+00:00$/, 'Z');
-              const date = new Date(normalizedDateStr);
-              if (isNaN(date)) {
-                console.error('Invalid date format: ' + dateStr);
-                return dateStr; // Fallback if invalid date
-              }
-              const day = date.getDate();
-              const month = date.toLocaleString('en-US', { month: 'long' });
-              const year = date.getFullYear();
-              return \`\${day}-\${month}-\${year}\`;
-            } catch (error) {
-              console.error('Error parsing date: ' + dateStr, error);
-              return dateStr; // Fallback to raw string
-            }
-          }
-
           function handleDownload(url, type) {
             if (url === 'Live Soon' || url === 'Class Cancelled') {
               alert(url === 'Live Soon' ? 'This class is Live Soon!' : 'This class is Cancelled!');
