@@ -40,7 +40,7 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // HTML template with user details box, refined UI, and responsive design
+    // HTML template with separate user details box, yellow fading border, and responsive design
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -52,6 +52,7 @@ app.get('/op', (req, res) => {
           body {
             font-family: 'Helvetica', sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -59,6 +60,19 @@ app.get('/op', (req, res) => {
             background: linear-gradient(45deg, #1a237e, #303f9f, #3f51b5);
             color: #ffffff;
             perspective: 1200px;
+          }
+          .user-box {
+            background: linear-gradient(45deg, #4a148c, #7b1fa2); /* Purple gradient */
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            max-width: 300px;
+            width: 90%;
+            margin-bottom: 20px;
+            transform: translateZ(40px);
+            animation: fadeIn 1.5s ease forwards;
+            border: 3px solid transparent;
+            border-image: linear-gradient(45deg, #ffeb3b, transparent) 1; /* Yellow fading border */
           }
           .container {
             text-align: center;
@@ -77,15 +91,6 @@ app.get('/op', (req, res) => {
           }
           .container:hover {
             transform: rotateX(0deg) rotateY(0deg);
-          }
-          .user-box {
-            background: linear-gradient(45deg, #4a148c, #7b1fa2); /* Different background */
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
-            transform: translateZ(30px);
-            animation: fadeIn 1.5s ease forwards;
           }
           @keyframes waveContainer {
             0%, 100% { transform: rotateX(5deg) rotateY(5deg) translateY(0); }
@@ -156,10 +161,10 @@ app.get('/op', (req, res) => {
             animation: none;
           }
           .popup.live-soon {
-            background: rgba(0, 128, 0, 0.9); /* Green for Live Soon */
+            background: rgba(0, 128, 0, 0.9);
           }
           .popup.cancelled {
-            background: rgba(255, 0, 0, 0.9); /* Red for Class Cancelled */
+            background: rgba(255, 0, 0, 0.9);
           }
           .popup.show {
             animation: slideInOut 2s ease forwards;
@@ -172,13 +177,14 @@ app.get('/op', (req, res) => {
           }
           /* Responsive adjustments */
           @media (max-width: 600px) {
+            .user-box {
+              padding: 10px;
+              max-width: 260px;
+              margin-bottom: 15px;
+            }
             .container {
               padding: 15px;
               max-width: 260px;
-            }
-            .user-box {
-              padding: 10px;
-              margin-bottom: 15px;
             }
             .thumbnail {
               width: 70px;
@@ -200,15 +206,15 @@ app.get('/op', (req, res) => {
         </style>
       </head>
       <body>
+        <div class="user-box">
+          <div class="label">Name - ${user_first_name}</div>
+          <div class="label">User Id - ${user_id}</div>
+        </div>
         <div class="container">
-          <div class="user-box">
-            <div class="label">Name - ${user_first_name}</div>
-            <div class="label">User Id - ${user_id}</div>
-          </div>
           <img class="thumbnail" src="${thumbnail}" alt="Teacher Thumbnail">
           <div class="label">𝗧𝗲𝗮𝗰𝗵𝗲𝗿 - ${teacher_name}</div>
           <div class="label">𝗖𝗹𝗮𝘀𝘀 𝗡𝗮𝗺𝗲 - ${class_name}</div>
-          <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 𝗖𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
+          <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 �_C𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
           <button onclick="handleDownload('${class_url}', 'class')">CLICK TO DOWNLOAD CLASS</button>
           <button onclick="handleDownload('${slides_url}', 'slides')">CLICK TO DOWNLOAD SLIDES</button>
         </div>
