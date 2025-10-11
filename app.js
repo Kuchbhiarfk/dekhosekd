@@ -448,7 +448,7 @@ app.get('/op', (req, res) => {
             const hours = Math.floor(timeDiff / (1000 * 60 * 60));
             const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-            document.getElementById('countdown').textContent = `Link Expires in - ${hours}h ${minutes}m ${seconds}s`;
+            document.getElementById('countdown').textContent = 'Link Expires in - ' + hours + 'h ' + minutes + 'm ' + seconds + 's';
           }
           setInterval(updateCountdown, 1000);
         </script>
