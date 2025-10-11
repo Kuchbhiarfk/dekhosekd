@@ -1,3 +1,4 @@
+// app.js (Redesigned UI with smaller text, new 3D animations, custom 3D popup sliding from right to left for 2 seconds)
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -38,191 +39,121 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // New HTML template: Sleek card with space-blue/orange-gold palette, orbit thumbnail, ripple buttons, center glow popup
+    // Redesigned HTML template: New colors, smaller text, different 3D animations (bounce for thumbnail, wave for container), custom 3D popup
     const html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${class_name}</title>
         <style>
           body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Helvetica', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #0a0a23, #1b1b4f); /* Deep space blue */
+            background: linear-gradient(45deg, #1a237e, #303f9f, #3f51b5);
             color: #ffffff;
-            perspective: 1000px;
-            overflow-y: auto;
+            perspective: 1200px; /* Adjusted 3D perspective */
           }
           .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 25px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 147, 41, 0.2); /* Orange glow */
-            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
             transform-style: preserve-3d;
-            transform: translateZ(20px);
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-            width: 90%;
-            max-width: 400px;
-            margin: 15px;
-            animation: cardEntry 1s ease forwards;
+            transform: rotateX(5deg) rotateY(5deg);
+            transition: transform 0.4s ease;
+            max-width: 350px;
+            animation: waveContainer 3s infinite ease-in-out; /* New wave animation */
           }
           .container:hover {
-            transform: translateZ(30px);
-            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 147, 41, 0.3);
+            transform: rotateX(0deg) rotateY(0deg) scale(1.02); /* Subtle lift on hover */
           }
-          @keyframes cardEntry {
-            from { opacity: 0; transform: translateY(50px) translateZ(20px); }
-            to { opacity: 1; transform: translateY(0) translateZ(20px); }
+          @keyframes waveContainer {
+            0%, 100% { transform: rotateX(5deg) rotateY(5deg) translateY(0); }
+            50% { transform: rotateX(5deg) rotateY(5deg) translateY(-10px); }
           }
           .thumbnail {
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            border: 3px solid #ff9329; /* Vibrant orange */
-            box-shadow: 0 0 15px #ff9329;
-            transform: translateZ(40px);
-            transition: transform 0.5s ease;
-            animation: orbitThumbnail 6s infinite linear; /* Orbital spin */
+            border: 4px solid #ffffff;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transform: translateZ(60px);
+            transition: transform 0.3s ease;
+            animation: bounceThumbnail 2s infinite ease-in-out; /* New bounce animation */
           }
           .thumbnail:hover {
-            transform: translateZ(50px) scale(1.05);
+            transform: translateZ(80px) scale(1.05);
           }
-          @keyframes orbitThumbnail {
-            0% { transform: translateZ(40px) rotate(0deg); }
-            100% { transform: translateZ(40px) rotate(360deg); }
+          @keyframes bounceThumbnail {
+            0%, 100% { transform: translateZ(60px) translateY(0); }
+            50% { transform: translateZ(60px) translateY(-8px); }
           }
           .label {
-            font-size: 1.1em;
-            font-weight: 600;
+            font-size: 1.1em; /* Smaller text size */
+            font-weight: bold;
             margin: 10px 0;
-            color: #ffd700; /* Gold text */
-            text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
-            transform: translateZ(15px);
-            animation: textSlideIn 0.8s ease forwards;
-            opacity: 0;
-          }
-          .label:nth-child(2) { animation-delay: 0.1s; }
-          .label:nth-child(3) { animation-delay: 0.2s; }
-          .label:nth-child(4) { animation-delay: 0.3s; }
-          @keyframes textSlideIn {
-            from { opacity: 0; transform: translateZ(15px) translateX(-20px); }
-            to { opacity: 1; transform: translateZ(15px) translateX(0); }
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            transform: translateZ(20px);
+            animation: fadeIn 1.5s ease forwards;
           }
           button {
-            position: relative;
-            padding: 14px 28px;
-            margin: 8px 5px;
-            background: linear-gradient(135deg, #ff6d00, #ffab40); /* Orange to gold */
-            color: #ffffff;
+            padding: 12px 25px;
+            margin: 8px;
+            background: linear-gradient(45deg, #ff4081, #f50057);
+            color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 30px;
             cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            box-shadow: 0 0 10px #ff6d00;
+            font-size: 0.9em;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.2); /* 3D button depth */
             transition: all 0.3s ease;
-            transform: translateZ(20px);
-            overflow: hidden;
-            width: 100%;
-            max-width: 280px;
-            text-transform: uppercase;
+            transform: translateZ(30px) perspective(150px) rotateX(0deg);
           }
           button:hover {
-            box-shadow: 0 0 20px #ff6d00;
-            transform: translateZ(30px) scale(1.03);
+            background: linear-gradient(45deg, #f50057, #ff4081);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), inset 0 -6px 12px rgba(0, 0, 0, 0.3);
+            transform: translateZ(50px) perspective(150px) rotateX(8deg) scale(1.05);
           }
-          button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s ease, height 0.6s ease;
-            z-index: 0;
+          button:active {
+            transform: translateZ(20px) perspective(150px) rotateX(4deg) scale(0.98);
           }
-          button:hover::before {
-            width: 300px;
-            height: 300px; /* Ripple effect on hover */
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateZ(20px) translateY(15px); }
+            to { opacity: 1; transform: translateZ(20px) translateY(0); }
           }
-          button span {
-            position: relative;
-            z-index: 1;
-          }
-          @keyframes ripple {
-            to { width: 300px; height: 300px; opacity: 0; }
-          }
-          /* Center Glow Popup */
+          /* Custom 3D Popup */
           .popup {
             position: fixed;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: rgba(10, 10, 35, 0.9); /* Dark space blue */
-            color: #ffd700;
+            right: -300px; /* Start off-screen right */
+            transform: translateY(-50%) translateZ(100px) perspective(500px) rotateY(-20deg); /* 3D effect */
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(255, 147, 41, 0.6);
-            font-size: 1.1em;
-            max-width: 80%;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            font-size: 1em;
+            max-width: 250px;
             opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            z-index: 1000;
-            border: 2px solid #ff6d00;
+            transition: opacity 0.3s ease;
+            animation: none; /* Animation applied via JS */
           }
           .popup.show {
-            animation: scaleGlow 2s ease forwards;
+            animation: slideInOut 2s ease forwards; /* Slide right to left for 2s */
           }
-          @keyframes scaleGlow {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; box-shadow: 0 0 0 rgba(255, 147, 41, 0); }
-            20% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 30px rgba(255, 147, 41, 0.8); }
-            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 30px rgba(255, 147, 41, 0.8); }
-            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; box-shadow: 0 0 0 rgba(255, 147, 41, 0); }
-          }
-          /* Responsive Design */
-          @media (max-width: 600px) {
-            .container {
-              padding: 20px;
-              width: 95%;
-              margin: 10px;
-            }
-            .thumbnail {
-              width: 100px;
-              height: 100px;
-            }
-            .label {
-              font-size: 1em;
-            }
-            button {
-              padding: 12px 20px;
-              font-size: 0.95em;
-              margin: 8px 0;
-            }
-            .popup {
-              max-width: 90%;
-              padding: 15px;
-              font-size: 1em;
-            }
-          }
-          @media (min-width: 601px) {
-            .container {
-              padding: 25px;
-              max-width: 400px;
-            }
-            button {
-              width: auto;
-              margin: 8px 5px;
-            }
+          @keyframes slideInOut {
+            0% { right: -300px; opacity: 0; transform: translateY(-50%) translateZ(100px) rotateY(-20deg); }
+            20% { right: 20px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); } /* Slide in */
+            80% { right: 20px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); } /* Stay */
+            100% { right: -300px; opacity: 0; transform: translateY(-50%) translateZ(100px) rotateY(-20deg); } /* Slide out */
           }
         </style>
       </head>
@@ -231,9 +162,9 @@ app.get('/op', (req, res) => {
           <img class="thumbnail" src="${thumbnail}" alt="Teacher Thumbnail">
           <div class="label">𝗧𝗲𝗮𝗰𝗵𝗲𝗿 - ${teacher_name}</div>
           <div class="label">𝗖𝗹𝗮𝘀𝘀 𝗡𝗮𝗺𝗲 - ${class_name}</div>
-          <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 �𝗖𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
-          <button><span>Click to Download Class</span></button>
-          <button><span>Click to Download Slides</span></button>
+          <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 𝗖𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
+          <button onclick="handleDownload('${class_url}', 'class')">CLICK TO DOWNLOAD CLASS</button>
+          <button onclick="handleDownload('${slides_url}', 'slides')">CLICK TO DOWNLOAD SLIDES</button>
         </div>
         <div id="popup" class="popup"></div>
         <script>
@@ -244,18 +175,11 @@ app.get('/op', (req, res) => {
               popup.classList.add('show');
               setTimeout(() => {
                 popup.classList.remove('show');
-              }, 2000);
+              }, 2000); // Hide after 2 seconds (animation handles fade out)
             } else {
               window.location.href = url;
             }
           }
-          // Attach click handlers to buttons
-          document.querySelectorAll('button').forEach((btn, index) => {
-            btn.addEventListener('click', () => {
-              const url = index === 0 ? '${class_url}' : '${slides_url}';
-              handleDownload(url, index === 0 ? 'class' : 'slides');
-            });
-          });
         </script>
       </body>
       </html>
