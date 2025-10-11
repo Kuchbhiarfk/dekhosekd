@@ -46,7 +46,7 @@ app.get('/op', (req, res) => {
     let timeLeft = '';
     try {
       const madeAtDate = new Date(made_at.replace(/\+00:00$/, 'Z'));
-      const currentDate = new Date('2025-10-11T10:49:00Z'); // Hardcoded to UTC equivalent of 04:19 PM IST
+      const currentDate = new Date(); // Use actual server time
       const expiryDate = new Date(madeAtDate.getTime() + 24 * 60 * 60 * 1000); // 24 hours later
       if (isNaN(madeAtDate)) {
         console.error(`Invalid made_at format: ${made_at}`);
@@ -448,7 +448,7 @@ app.get('/op', (req, res) => {
             const hours = Math.floor(timeDiff / (1000 * 60 * 60));
             const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-            document.getElementById('countdown').textContent = \`Link Expires in - \${hours}h \${minutes}m \${seconds}s\`;
+            document.getElementById('countdown').textContent = `Link Expires in - ${hours}h ${minutes}m ${seconds}s`;
           }
           setInterval(updateCountdown, 1000);
         </script>
