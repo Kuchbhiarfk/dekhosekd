@@ -38,13 +38,13 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // HTML template with refined UI: centered box, borders, mobile/desktop responsive, no zoomout
+    // HTML template with fixed centering, no zoom in/out, and dynamic popup background
     const html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <!-- Prevent zoom -->
         <title>${class_name}</title>
         <style>
           body {
@@ -56,50 +56,48 @@ app.get('/op', (req, res) => {
             margin: 0;
             background: linear-gradient(45deg, #1a237e, #303f9f, #3f51b5);
             color: #ffffff;
-            perspective: 1200px; /* Kept for 3D effects */
+            perspective: 1200px;
           }
           .container {
             text-align: center;
             background: rgba(255, 255, 255, 0.2);
-            padding: 25px;
+            padding: 20px;
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(8px);
             transform-style: preserve-3d;
             transform: rotateX(5deg) rotateY(5deg);
-            transition: transform 0.4s ease;
-            max-width: 320px; /* Smaller for better fit */
-            width: 90%; /* Responsive width */
-            border: 3px solid rgba(255, 255, 255, 0.5); /* Border around all sides */
+            max-width: 300px;
+            width: 90%;
+            border: 3px solid rgba(255, 255, 255, 0.5);
             box-sizing: border-box;
-            animation: waveContainer 3s infinite ease-in-out; /* Subtle wave */
+            animation: waveContainer 3s infinite ease-in-out;
           }
           .container:hover {
-            transform: rotateX(0deg) rotateY(0deg); /* No zoomout, just straighten */
+            transform: rotateX(0deg) rotateY(0deg); /* No scale, just straighten */
           }
           @keyframes waveContainer {
             0%, 100% { transform: rotateX(5deg) rotateY(5deg) translateY(0); }
-            50% { transform: rotateX(5deg) rotateY(5deg) translateY(-8px); }
+            50% { transform: rotateX(5deg) rotateY(5deg) translateY(-6px); }
           }
           .thumbnail {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             border: 4px solid #ffffff;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             transform: translateZ(60px);
-            transition: transform 0.3s ease;
             animation: bounceThumbnail 2s infinite ease-in-out;
           }
           .thumbnail:hover {
-            transform: translateZ(80px); /* Subtle lift, no scale */
+            transform: translateZ(80px); /* No scale */
           }
           @keyframes bounceThumbnail {
             0%, 100% { transform: translateZ(60px) translateY(0); }
-            50% { transform: translateZ(60px) translateY(-6px); }
+            50% { transform: translateZ(60px) translateY(-5px); }
           }
           .label {
-            font-size: 1em; /* Even smaller text for mobile */
+            font-size: 0.95em;
             font-weight: bold;
             margin: 8px 0;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
@@ -107,14 +105,14 @@ app.get('/op', (req, res) => {
             animation: fadeIn 1.5s ease forwards;
           }
           button {
-            padding: 10px 20px;
-            margin: 6px;
+            padding: 8px 15px;
+            margin: 5px;
             background: linear-gradient(45deg, #ff4081, #f50057);
             color: white;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 0.8em;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             transform: translateZ(30px) perspective(150px) rotateX(0deg);
@@ -136,46 +134,51 @@ app.get('/op', (req, res) => {
             top: 50%;
             right: -300px;
             transform: translateY(-50%) translateZ(100px) perspective(500px) rotateY(-20deg);
-            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            font-size: 0.9em;
-            max-width: 200px;
+            font-size: 0.85em;
+            max-width: 180px;
             opacity: 0;
             transition: opacity 0.3s ease;
             animation: none;
+          }
+          .popup.live-soon {
+            background: rgba(0, 128, 0, 0.9); /* Green for Live Soon */
+          }
+          .popup.cancelled {
+            background: rgba(255, 0, 0, 0.9); /* Red for Class Cancelled */
           }
           .popup.show {
             animation: slideInOut 2s ease forwards;
           }
           @keyframes slideInOut {
             0% { right: -300px; opacity: 0; transform: translateY(-50%) translateZ(100px) rotateY(-20deg); }
-            20% { right: 15px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); }
-            80% { right: 15px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); }
+            20% { right: 10px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); }
+            80% { right: 10px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); }
             100% { right: -300px; opacity: 0; transform: translateY(-50%) translateZ(100px) rotateY(-20deg); }
           }
           /* Responsive adjustments */
           @media (max-width: 600px) {
             .container {
-              padding: 20px;
-              max-width: 280px;
+              padding: 15px;
+              max-width: 260px;
             }
             .thumbnail {
-              width: 80px;
-              height: 80px;
+              width: 70px;
+              height: 70px;
             }
             .label {
-              font-size: 0.9em;
+              font-size: 0.85em;
             }
             button {
-              padding: 8px 15px;
-              font-size: 0.8em;
+              padding: 7px 12px;
+              font-size: 0.75em;
             }
             .popup {
-              max-width: 180px;
-              padding: 12px;
+              max-width: 160px;
+              padding: 10px;
               font-size: 0.8em;
             }
           }
@@ -196,6 +199,7 @@ app.get('/op', (req, res) => {
             if (url === 'Live Soon' || url === 'Class Cancelled') {
               const popup = document.getElementById('popup');
               popup.textContent = url === 'Live Soon' ? 'This class is Live Soon!' : 'This class is Cancelled!';
+              popup.className = 'popup ' + (url === 'Live Soon' ? 'live-soon' : 'cancelled');
               popup.classList.add('show');
               setTimeout(() => {
                 popup.classList.remove('show');
