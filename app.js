@@ -38,7 +38,7 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // HTML template with refined UI: better box, responsive, no zoom
+    // HTML template with refined UI: centered box, borders, mobile/desktop responsive, no zoomout
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -54,127 +54,129 @@ app.get('/op', (req, res) => {
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background: linear-gradient(180deg, #1b263b, #2c3e50);
+            background: linear-gradient(45deg, #1a237e, #303f9f, #3f51b5);
             color: #ffffff;
-            perspective: 1000px;
+            perspective: 1200px; /* Kept for 3D effects */
           }
           .container {
             text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px solid linear-gradient(45deg, #00e5ff, #b388ff); /* Subtle gradient border */
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(6px);
+            background: rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
             transform-style: preserve-3d;
-            transform: rotateX(3deg) rotateY(3deg);
-            transition: transform 0.3s ease;
-            width: 90%;
-            max-width: 360px; /* Smaller for mobile */
-            animation: gentleWave 4s infinite ease-in-out;
+            transform: rotateX(5deg) rotateY(5deg);
+            transition: transform 0.4s ease;
+            max-width: 320px; /* Smaller for better fit */
+            width: 90%; /* Responsive width */
+            border: 3px solid rgba(255, 255, 255, 0.5); /* Border around all sides */
+            box-sizing: border-box;
+            animation: waveContainer 3s infinite ease-in-out; /* Subtle wave */
           }
           .container:hover {
-            transform: rotateX(0deg) rotateY(0deg); /* No scale, just flatten */
+            transform: rotateX(0deg) rotateY(0deg); /* No zoomout, just straighten */
           }
-          @keyframes gentleWave {
-            0%, 100% { transform: rotateX(3deg) rotateY(3deg) translateY(0); }
-            50% { transform: rotateX(3deg) rotateY(3deg) translateY(-5px); }
+          @keyframes waveContainer {
+            0%, 100% { transform: rotateX(5deg) rotateY(5deg) translateY(0); }
+            50% { transform: rotateX(5deg) rotateY(5deg) translateY(-8px); }
           }
           .thumbnail {
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            border: 3px solid #00e5ff;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-            transform: translateZ(40px);
+            border: 4px solid #ffffff;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transform: translateZ(60px);
             transition: transform 0.3s ease;
-            animation: softBounce 3s infinite ease-in-out;
+            animation: bounceThumbnail 2s infinite ease-in-out;
           }
           .thumbnail:hover {
-            transform: translateZ(50px); /* Lift only, no scale */
+            transform: translateZ(80px); /* Subtle lift, no scale */
           }
-          @keyframes softBounce {
-            0%, 100% { transform: translateZ(40px) translateY(0); }
-            50% { transform: translateZ(40px) translateY(-4px); }
+          @keyframes bounceThumbnail {
+            0%, 100% { transform: translateZ(60px) translateY(0); }
+            50% { transform: translateZ(60px) translateY(-6px); }
           }
           .label {
-            font-size: 0.95em; /* Smaller text for elegance */
+            font-size: 1em; /* Even smaller text for mobile */
             font-weight: bold;
             margin: 8px 0;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
-            transform: translateZ(15px);
-            animation: fadeIn 1.2s ease forwards;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            transform: translateZ(20px);
+            animation: fadeIn 1.5s ease forwards;
           }
           button {
             padding: 10px 20px;
             margin: 6px;
-            background: linear-gradient(45deg, #00e5ff, #b388ff);
+            background: linear-gradient(45deg, #ff4081, #f50057);
             color: white;
             border: none;
             border-radius: 25px;
             cursor: pointer;
             font-size: 0.85em;
-            font-weight: bold;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3), inset 0 -2px 5px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
-            transform: translateZ(25px) perspective(100px) rotateX(0deg);
+            transform: translateZ(30px) perspective(150px) rotateX(0deg);
           }
           button:hover {
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4), inset 0 -4px 8px rgba(0, 0, 0, 0.2);
-            transform: translateZ(35px) perspective(100px) rotateX(5deg); /* 3D lift and tilt */
+            background: linear-gradient(45deg, #f50057, #ff4081);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), inset 0 -6px 12px rgba(0, 0, 0, 0.3);
+            transform: translateZ(50px) perspective(150px) rotateX(8deg);
           }
           button:active {
-            transform: translateZ(15px) perspective(100px) rotateX(2deg);
+            transform: translateZ(20px) perspective(150px) rotateX(4deg);
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateZ(20px) translateY(10px); }
+            to { opacity: 1; transform: translateZ(20px) translateY(0); }
           }
           .popup {
             position: fixed;
             top: 50%;
-            right: -250px;
-            transform: translateY(-50%) translateZ(80px) perspective(400px) rotateY(-15deg);
-            background: rgba(0, 0, 0, 0.85);
-            color: #00e5ff;
+            right: -300px;
+            transform: translateY(-50%) translateZ(100px) perspective(500px) rotateY(-20deg);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
             padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
             font-size: 0.9em;
             max-width: 200px;
             opacity: 0;
             transition: opacity 0.3s ease;
+            animation: none;
           }
           .popup.show {
             animation: slideInOut 2s ease forwards;
           }
           @keyframes slideInOut {
-            0% { right: -250px; opacity: 0; transform: translateY(-50%) translateZ(80px) rotateY(-15deg); }
-            20% { right: 10px; opacity: 1; transform: translateY(-50%) translateZ(80px) rotateY(0deg); }
-            80% { right: 10px; opacity: 1; transform: translateY(-50%) translateZ(80px) rotateY(0deg); }
-            100% { right: -250px; opacity: 0; transform: translateY(-50%) translateZ(80px) rotateY(-15deg); }
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateZ(15px) translateY(10px); }
-            to { opacity: 1; transform: translateZ(15px) translateY(0); }
+            0% { right: -300px; opacity: 0; transform: translateY(-50%) translateZ(100px) rotateY(-20deg); }
+            20% { right: 15px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); }
+            80% { right: 15px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); }
+            100% { right: -300px; opacity: 0; transform: translateY(-50%) translateZ(100px) rotateY(-20deg); }
           }
           /* Responsive adjustments */
-          @media (min-width: 768px) {
+          @media (max-width: 600px) {
             .container {
-              padding: 30px;
-              max-width: 400px; /* Slightly larger for desktop */
+              padding: 20px;
+              max-width: 280px;
             }
             .thumbnail {
-              width: 120px;
-              height: 120px;
+              width: 80px;
+              height: 80px;
             }
             .label {
-              font-size: 1.1em;
+              font-size: 0.9em;
             }
             button {
-              padding: 12px 25px;
-              font-size: 0.95em;
+              padding: 8px 15px;
+              font-size: 0.8em;
             }
             .popup {
-              max-width: 250px;
-              padding: 20px;
-              font-size: 1em;
+              max-width: 180px;
+              padding: 12px;
+              font-size: 0.8em;
             }
           }
         </style>
