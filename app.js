@@ -4,7 +4,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Encryption settings
-const ENCRYPTION_KEY = Buffer.from('b7e2f4a9c8d3e6b1f0a2c5d7e9b4f1a3c6d8e0f2a4b5c7d9e1f0a3b6c8d4e2f', 'hex'); // 32 bytes
+const ENCRYPTION_KEY = Buffer.from('b7e2f4a9c8d3e6b1f0a2c5d7e9b4f1a3c6d8e0f2a4b5c7d9e1f0a3b6c8d4e2ff', 'hex'); // 32 bytes
 const IV = Buffer.from('a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6', 'hex'); // 16 bytes
 
 // Encryption function
