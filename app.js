@@ -38,7 +38,7 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // Enhanced HTML template: Single neon-glow card, vibrant colors, obvious buttons, user-friendly layout
+    // New HTML template: Sleek card with space-blue/orange-gold palette, orbit thumbnail, ripple buttons, center glow popup
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -48,121 +48,146 @@ app.get('/op', (req, res) => {
         <title>${class_name}</title>
         <style>
           body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #1a0033, #330066); /* Deep neon purple */
+            background: linear-gradient(135deg, #0a0a23, #1b1b4f); /* Deep space blue */
             color: #ffffff;
             perspective: 1000px;
             overflow-y: auto;
           }
           .container {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.2);
-            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 147, 41, 0.2); /* Orange glow */
+            backdrop-filter: blur(10px);
             transform-style: preserve-3d;
             transform: translateZ(20px);
             transition: transform 0.4s ease, box-shadow 0.4s ease;
             width: 90%;
-            max-width: 450px;
-            margin: 20px;
-            animation: neonGlow 2s infinite alternate ease-in-out;
+            max-width: 400px;
+            margin: 15px;
+            animation: cardEntry 1s ease forwards;
           }
           .container:hover {
             transform: translateZ(30px);
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.4);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 147, 41, 0.3);
           }
-          @keyframes neonGlow {
-            0% { box-shadow: 0 0 20px rgba(255, 0, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.2); }
-            100% { box-shadow: 0 0 30px rgba(255, 0, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.4); }
+          @keyframes cardEntry {
+            from { opacity: 0; transform: translateY(50px) translateZ(20px); }
+            to { opacity: 1; transform: translateY(0) translateZ(20px); }
           }
           .thumbnail {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            border: 3px solid #ff00ff; /* Neon pink */
-            box-shadow: 0 0 15px #ff00ff;
+            border: 3px solid #ff9329; /* Vibrant orange */
+            box-shadow: 0 0 15px #ff9329;
             transform: translateZ(40px);
-            transition: transform 0.3s ease;
-            animation: bounceGlow 2s infinite ease-in-out;
+            transition: transform 0.5s ease;
+            animation: orbitThumbnail 6s infinite linear; /* Orbital spin */
           }
           .thumbnail:hover {
             transform: translateZ(50px) scale(1.05);
           }
-          @keyframes bounceGlow {
-            0%, 100% { transform: translateZ(40px) translateY(0); box-shadow: 0 0 15px #ff00ff; }
-            50% { transform: translateZ(40px) translateY(-5px); box-shadow: 0 0 25px #ff00ff; }
+          @keyframes orbitThumbnail {
+            0% { transform: translateZ(40px) rotate(0deg); }
+            100% { transform: translateZ(40px) rotate(360deg); }
           }
           .label {
-            font-size: 1.2em;
-            font-weight: 700;
-            margin: 10px 0;
-            color: #00ffff; /* Neon cyan */
-            text-shadow: 0 0 5px #00ffff;
-            transform: translateZ(15px);
-            animation: slideInText 1s ease forwards;
-          }
-          button {
-            padding: 15px 30px;
-            margin: 10px 5px;
-            background: linear-gradient(135deg, #ff00ff, #00f0ff); /* Neon pink to cyan */
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
             font-size: 1.1em;
             font-weight: 600;
-            box-shadow: 0 0 15px #ff00ff, inset 0 -3px 6px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            transform: translateZ(25px);
-            width: 100%;
-            max-width: 300px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin: 10px 0;
+            color: #ffd700; /* Gold text */
+            text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+            transform: translateZ(15px);
+            animation: textSlideIn 0.8s ease forwards;
+            opacity: 0;
           }
-          button:hover {
-            background: linear-gradient(135deg, #00f0ff, #ff00ff);
-            box-shadow: 0 0 25px #00f0ff;
-            transform: translateZ(35px) scale(1.03);
-          }
-          button:active {
-            transform: translateZ(20px) scale(0.98);
-          }
-          @keyframes slideInText {
-            from { opacity: 0; transform: translateZ(15px) translateX(-30px); }
+          .label:nth-child(2) { animation-delay: 0.1s; }
+          .label:nth-child(3) { animation-delay: 0.2s; }
+          .label:nth-child(4) { animation-delay: 0.3s; }
+          @keyframes textSlideIn {
+            from { opacity: 0; transform: translateZ(15px) translateX(-20px); }
             to { opacity: 1; transform: translateZ(15px) translateX(0); }
           }
-          /* Center Scale Popup with Enhanced Neon Glow */
+          button {
+            position: relative;
+            padding: 14px 28px;
+            margin: 8px 5px;
+            background: linear-gradient(135deg, #ff6d00, #ffab40); /* Orange to gold */
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            box-shadow: 0 0 10px #ff6d00;
+            transition: all 0.3s ease;
+            transform: translateZ(20px);
+            overflow: hidden;
+            width: 100%;
+            max-width: 280px;
+            text-transform: uppercase;
+          }
+          button:hover {
+            box-shadow: 0 0 20px #ff6d00;
+            transform: translateZ(30px) scale(1.03);
+          }
+          button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+            z-index: 0;
+          }
+          button:hover::before {
+            width: 300px;
+            height: 300px; /* Ripple effect on hover */
+          }
+          button span {
+            position: relative;
+            z-index: 1;
+          }
+          @keyframes ripple {
+            to { width: 300px; height: 300px; opacity: 0; }
+          }
+          /* Center Glow Popup */
           .popup {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            background: rgba(0, 0, 0, 0.85);
-            color: #00ffff;
+            background: rgba(10, 10, 35, 0.9); /* Dark space blue */
+            color: #ffd700;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), 0 0 40px rgba(255, 0, 255, 0.4);
+            box-shadow: 0 0 20px rgba(255, 147, 41, 0.6);
             font-size: 1.1em;
             max-width: 80%;
             opacity: 0;
             transition: transform 0.3s ease, opacity 0.3s ease;
             z-index: 1000;
-            border: 2px solid #ff00ff;
+            border: 2px solid #ff6d00;
           }
           .popup.show {
-            animation: scaleNeonGlow 2s ease forwards;
+            animation: scaleGlow 2s ease forwards;
           }
-          @keyframes scaleNeonGlow {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; box-shadow: 0 0 0 rgba(0, 255, 255, 0); }
-            20% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 30px rgba(0, 255, 255, 0.8); }
-            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 30px rgba(0, 255, 255, 0.8); }
-            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; box-shadow: 0 0 0 rgba(0, 255, 255, 0); }
+          @keyframes scaleGlow {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; box-shadow: 0 0 0 rgba(255, 147, 41, 0); }
+            20% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 30px rgba(255, 147, 41, 0.8); }
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; box-shadow: 0 0 30px rgba(255, 147, 41, 0.8); }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; box-shadow: 0 0 0 rgba(255, 147, 41, 0); }
           }
           /* Responsive Design */
           @media (max-width: 600px) {
@@ -172,15 +197,15 @@ app.get('/op', (req, res) => {
               margin: 10px;
             }
             .thumbnail {
-              width: 110px;
-              height: 110px;
+              width: 100px;
+              height: 100px;
             }
             .label {
-              font-size: 1.1em;
+              font-size: 1em;
             }
             button {
               padding: 12px 20px;
-              font-size: 1em;
+              font-size: 0.95em;
               margin: 8px 0;
             }
             .popup {
@@ -191,12 +216,12 @@ app.get('/op', (req, res) => {
           }
           @media (min-width: 601px) {
             .container {
-              padding: 30px;
-              max-width: 450px;
+              padding: 25px;
+              max-width: 400px;
             }
             button {
               width: auto;
-              margin: 10px 5px;
+              margin: 8px 5px;
             }
           }
         </style>
@@ -206,9 +231,9 @@ app.get('/op', (req, res) => {
           <img class="thumbnail" src="${thumbnail}" alt="Teacher Thumbnail">
           <div class="label">𝗧𝗲𝗮𝗰𝗵𝗲𝗿 - ${teacher_name}</div>
           <div class="label">𝗖𝗹𝗮𝘀𝘀 𝗡𝗮𝗺𝗲 - ${class_name}</div>
-          <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 𝗖𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
-          <button onclick="handleDownload('${class_url}', 'class')">Click to Download Class</button>
-          <button onclick="handleDownload('${slides_url}', 'slides')">Click to Download Slides</button>
+          <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 �𝗖𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
+          <button><span>Click to Download Class</span></button>
+          <button><span>Click to Download Slides</span></button>
         </div>
         <div id="popup" class="popup"></div>
         <script>
@@ -224,6 +249,13 @@ app.get('/op', (req, res) => {
               window.location.href = url;
             }
           }
+          // Attach click handlers to buttons
+          document.querySelectorAll('button').forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+              const url = index === 0 ? '${class_url}' : '${slides_url}';
+              handleDownload(url, index === 0 ? 'class' : 'slides');
+            });
+          });
         </script>
       </body>
       </html>
