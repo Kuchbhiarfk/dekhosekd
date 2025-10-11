@@ -1,4 +1,4 @@
-// app.js (Enhanced UI with more fun elements: vibrant colors, sparkles, smoother animations; fully responsive for mobile/desktop)
+// app.js (Redesigned UI: Clean modern card with soft pastel colors, improved responsiveness, fixed zoom issues by optimizing sizes and viewport)
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -39,167 +39,164 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // Enhanced HTML template: Vibrant theme, sparkle effects, responsive design with media queries
+    // New HTML template: Modern card design with pastel colors, subtle shadows, no forced zoom (optimized for fit), new animations (fade-slide for elements)
     const html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <!-- Prevent user zoom, ensure fit -->
         <title>${class_name}</title>
         <style>
           body {
-            font-family: 'Helvetica', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh; /* Ensure full height without zoom out */
             margin: 0;
-            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcfcf);
-            color: #333333;
-            perspective: 1200px;
-            overflow: hidden; /* Prevent scroll on mobile */
+            background: linear-gradient(135deg, #e0f7fa, #b2ebf2); /* Soft pastel blue gradient */
+            color: #424242;
+            perspective: 800px;
+            overflow-y: auto; /* Allow scroll if needed, no overflow hidden */
           }
           .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transform-style: preserve-3d;
-            transform: rotateX(3deg) rotateY(3deg);
-            transition: transform 0.5s ease, box-shadow 0.5s ease;
-            max-width: 80%;
-            width: 400px;
-            animation: sparkleContainer 4s infinite ease-in-out; /* Fun sparkle animation */
+            transform: rotateX(2deg) rotateY(2deg);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 90%;
+            max-width: 450px;
+            margin: 20px; /* Add margin for better centering without zoom */
+            animation: fadeSlideIn 1s ease forwards; /* New fade-slide animation */
           }
           .container:hover {
-            transform: rotateX(0deg) rotateY(0deg) scale(1.03);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            transform: rotateX(0deg) rotateY(0deg);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
           }
-          @keyframes sparkleContainer {
-            0%, 100% { box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); }
-            50% { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5); } /* Golden sparkle */
+          @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(50px) rotateX(2deg) rotateY(2deg); }
+            to { opacity: 1; transform: translateY(0) rotateX(2deg) rotateY(2deg); }
           }
           .thumbnail {
-            width: 100px;
-            height: 100px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
-            border: 3px solid #ff6b6b;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-            transform: translateZ(50px);
-            transition: transform 0.4s ease;
-            animation: pulseThumbnail 2.5s infinite ease-in-out; /* Fun pulse animation */
+            border: 4px solid #81d4fa; /* Pastel blue border */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateZ(40px);
+            transition: transform 0.3s ease;
+            animation: gentleFloat 3s infinite ease-in-out; /* New gentle float animation */
           }
           .thumbnail:hover {
-            transform: translateZ(70px) scale(1.1);
+            transform: translateZ(60px) scale(1.05);
           }
-          @keyframes pulseThumbnail {
-            0%, 100% { transform: translateZ(50px) scale(1); }
-            50% { transform: translateZ(50px) scale(1.05); }
+          @keyframes gentleFloat {
+            0%, 100% { transform: translateZ(40px) translateY(0); }
+            50% { transform: translateZ(40px) translateY(-5px); }
           }
           .label {
-            font-size: 1em; /* Even smaller for mobile-friendliness */
-            font-weight: bold;
-            margin: 8px 0;
-            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1);
-            transform: translateZ(15px);
-            animation: fadeInGlow 1.2s ease forwards;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin: 12px 0;
+            color: #0277bd; /* Deeper blue for text */
+            transform: translateZ(10px);
+            animation: textFadeIn 0.8s ease forwards 0.3s; /* Delayed fade-in */
+            opacity: 0;
           }
           button {
-            padding: 10px 20px;
-            margin: 6px;
-            background: linear-gradient(45deg, #4ecdc4, #556270);
+            padding: 12px 24px;
+            margin: 8px 4px;
+            background: linear-gradient(135deg, #4fc3f7, #0288d1); /* Pastel to deep blue */
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.85em;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.1);
-            transition: all 0.4s ease;
-            transform: translateZ(25px) perspective(120px) rotateX(0deg);
-            width: auto;
+            font-size: 1em;
+            font-weight: 500;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            transform: translateZ(20px);
           }
           button:hover {
-            background: linear-gradient(45deg, #556270, #4ecdc4);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(0, 0, 0, 0.2);
-            transform: translateZ(40px) perspective(120px) rotateX(6deg) scale(1.05);
+            background: linear-gradient(135deg, #0288d1, #4fc3f7);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+            transform: translateZ(30px) scale(1.02);
           }
           button:active {
-            transform: translateZ(15px) perspective(120px) rotateX(3deg) scale(0.95);
+            transform: translateZ(15px) scale(0.98);
           }
-          @keyframes fadeInGlow {
-            from { opacity: 0; transform: translateZ(15px) translateY(10px); text-shadow: 0 0 0 rgba(255, 215, 0, 0); }
-            to { opacity: 1; transform: translateZ(15px) translateY(0); text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+          @keyframes textFadeIn {
+            from { opacity: 0; transform: translateZ(10px) translateX(-20px); }
+            to { opacity: 1; transform: translateZ(10px) translateX(0); }
           }
-          /* Custom 3D Popup - Enhanced with glow */
+          /* Custom Popup: Slide from bottom with fade */
           .popup {
             position: fixed;
-            top: 50%;
-            right: -250px;
-            transform: translateY(-50%) translateZ(80px) perspective(400px) rotateY(-15deg);
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%) translateZ(50px) perspective(300px) rotateX(10deg);
             background: rgba(255, 255, 255, 0.95);
-            color: #333;
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            font-size: 0.95em;
-            max-width: 200px;
+            color: #424242;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            font-size: 1em;
+            max-width: 80%;
             opacity: 0;
             transition: opacity 0.3s ease;
-            animation: none;
-            border: 2px solid #ff6b6b;
+            border: 1px solid #81d4fa;
           }
           .popup.show {
-            animation: slideInOutGlow 2s ease forwards;
+            animation: bottomSlideInOut 2s ease forwards;
           }
-          @keyframes slideInOutGlow {
-            0% { right: -250px; opacity: 0; transform: translateY(-50%) translateZ(80px) rotateY(-15deg); box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
-            20% { right: 15px; opacity: 1; transform: translateY(-50%) translateZ(80px) rotateY(0deg); box-shadow: 0 0 10px rgba(255, 215, 0, 0.7); }
-            80% { right: 15px; opacity: 1; transform: translateY(-50%) translateZ(80px) rotateY(0deg); box-shadow: 0 0 10px rgba(255, 215, 0, 0.7); }
-            100% { right: -250px; opacity: 0; transform: translateY(-50%) translateZ(80px) rotateY(-15deg); box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
+          @keyframes bottomSlideInOut {
+            0% { bottom: -100px; opacity: 0; transform: translateX(-50%) translateZ(50px) rotateX(10deg); }
+            20% { bottom: 20px; opacity: 1; transform: translateX(-50%) translateZ(50px) rotateX(0deg); }
+            80% { bottom: 20px; opacity: 1; transform: translateX(-50%) translateZ(50px) rotateX(0deg); }
+            100% { bottom: -100px; opacity: 0; transform: translateX(-50%) translateZ(50px) rotateX(10deg); }
           }
-          /* Responsive Design */
+          /* Responsive Design: Adjust for mobile/desktop */
           @media (max-width: 600px) {
+            body {
+              align-items: flex-start; /* Align to top on mobile to avoid zoom out */
+              padding-top: 20px;
+            }
             .container {
-              padding: 15px;
-              width: 90%;
-              max-width: none;
+              padding: 20px;
+              width: 85%;
+              margin: 10px auto;
             }
             .thumbnail {
-              width: 80px;
-              height: 80px;
+              width: 120px;
+              height: 120px;
             }
             .label {
-              font-size: 0.9em;
+              font-size: 1.1em;
             }
             button {
-              padding: 8px 16px;
-              font-size: 0.8em;
-              width: 100%; /* Full-width buttons on mobile */
+              width: 100%;
               margin: 8px 0;
+              padding: 10px;
+              font-size: 0.95em;
             }
             .popup {
-              max-width: 80%;
-              padding: 12px;
-              font-size: 0.85em;
-              right: -100%; /* Adjust for smaller screens */
-            }
-            @keyframes slideInOutGlow {
-              0% { right: -100%; opacity: 0; }
-              20% { right: 10px; opacity: 1; }
-              80% { right: 10px; opacity: 1; }
-              100% { right: -100%; opacity: 0; }
+              max-width: 90%;
+              padding: 12px 20px;
+              font-size: 0.95em;
             }
           }
           @media (min-width: 601px) {
-            /* Desktop-specific tweaks */
             .container {
               padding: 30px;
-              width: 350px;
+              width: 400px;
             }
             button {
               width: auto;
+              padding: 12px 24px;
             }
           }
         </style>
