@@ -40,7 +40,12 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // HTML template with larger boxes, fixed zoom, and centered layout
+    // Determine lecture URL based on is_offline
+    const lectureUrl = is_offline === 'true'
+      ? `https://studyuk.fun/sdv.html?url=${encodeURIComponent(class_url)}&title=${encodeURIComponent(class_name)}`
+      : `http://studyuk.fun/umplayer.html?playurl=${encodeURIComponent(class_url)}&pdf=${encodeURIComponent(slides_url)}`;
+
+    // HTML template with larger boxes, rounded user box, advanced buttons, and new lecture button
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -60,14 +65,14 @@ app.get('/op', (req, res) => {
             background: linear-gradient(45deg, #1a237e, #303f9f, #3f51b5);
             color: #ffffff;
             perspective: 1200px;
-            overflow: hidden; /* Prevent scroll-induced zoom */
+            overflow: hidden;
           }
           .user-box {
             background: linear-gradient(45deg, #4a148c, #7b1fa2);
             padding: 25px;
-            border-radius: 15px;
+            border-radius: 25px; /* More rounded corners */
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-            max-width: 400px; /* Larger box */
+            max-width: 400px;
             width: 95%;
             margin-bottom: 30px;
             transform: translateZ(40px);
@@ -85,7 +90,7 @@ app.get('/op', (req, res) => {
             backdrop-filter: blur(8px);
             transform-style: preserve-3d;
             transform: rotateX(5deg) rotateY(5deg);
-            max-width: 400px; /* Larger box */
+            max-width: 400px;
             width: 95%;
             border: 3px solid rgba(255, 255, 255, 0.5);
             box-sizing: border-box;
@@ -115,7 +120,7 @@ app.get('/op', (req, res) => {
             50% { transform: translateZ(60px) translateY(-5px); }
           }
           .label {
-            font-size: 1.1em; /* Slightly larger for bigger boxes */
+            font-size: 1.1em;
             font-weight: bold;
             margin: 10px 0;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
@@ -123,25 +128,45 @@ app.get('/op', (req, res) => {
             animation: fadeIn 1.5s ease forwards;
           }
           button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             margin: 6px;
-            background: linear-gradient(45deg, #ff4081, #f50057);
+            background: linear-gradient(135deg, #ff4081, #f50057, #d81b60);
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 30px;
             cursor: pointer;
-            font-size: 0.9em;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.2);
+            font-size: 0.95em;
+            font-weight: bold;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), inset 0 -4px 8px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
-            transform: translateZ(30px) perspective(150px) rotateX(0deg);
+            transform: translateZ(35px) perspective(200px) rotateX(0deg);
+            position: relative;
+            overflow: hidden;
+          }
+          button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+          }
+          button:hover::after {
+            width: 200px;
+            height: 200px;
           }
           button:hover {
-            background: linear-gradient(45deg, #f50057, #ff4081);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), inset 0 -6px 12px rgba(0, 0, 0, 0.3);
-            transform: translateZ(50px) perspective(150px) rotateX(8deg);
+            background: linear-gradient(135deg, #f50057, #ff4081, #d81b60);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5), inset 0 -6px 12px rgba(0, 0, 0, 0.3);
+            transform: translateZ(55px) perspective(200px) rotateX(10deg);
           }
           button:active {
-            transform: translateZ(20px) perspective(150px) rotateX(4deg);
+            transform: translateZ(25px) perspective(200px) rotateX(5deg);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(0, 0, 0, 0.2);
           }
           @keyframes fadeIn {
             from { opacity: 0; transform: translateZ(20px) translateY(10px); }
@@ -183,6 +208,7 @@ app.get('/op', (req, res) => {
               padding: 20px;
               max-width: 340px;
               margin-bottom: 20px;
+              border-radius: 20px;
             }
             .container {
               padding: 20px;
@@ -196,8 +222,8 @@ app.get('/op', (req, res) => {
               font-size: 1em;
             }
             button {
-              padding: 8px 16px;
-              font-size: 0.85em;
+              padding: 10px 18px;
+              font-size: 0.9em;
             }
             .popup {
               max-width: 180px;
@@ -215,10 +241,11 @@ app.get('/op', (req, res) => {
         <div class="container">
           <img class="thumbnail" src="${thumbnail}" alt="Teacher Thumbnail">
           <div class="label">𝗧𝗲𝗮𝗰𝗵𝗲𝗿 - ${teacher_name}</div>
-          <div class="label">𝗖𝗹𝗮𝘀𝘀 𝗡𝗮𝗺𝗲 - ${class_name}</div>
+          <div class="label">𝗖𝗹𝗮𝘀𝘀 𝗡𝗮𝗺𝗴 - ${class_name}</div>
           <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 𝗖𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
           <button onclick="handleDownload('${class_url}', 'class')">CLICK TO DOWNLOAD CLASS</button>
           <button onclick="handleDownload('${slides_url}', 'slides')">CLICK TO DOWNLOAD SLIDES</button>
+          <button onclick="handleWatchLecture('${lectureUrl}')">CLICK TO WATCH LECTURE</button>
         </div>
         <div id="popup" class="popup"></div>
         <script>
@@ -234,6 +261,9 @@ app.get('/op', (req, res) => {
             } else {
               window.location.href = url;
             }
+          }
+          function handleWatchLecture(url) {
+            window.location.href = url;
           }
         </script>
       </body>
