@@ -40,7 +40,7 @@ app.get('/op', (req, res) => {
       formattedDate = live_at_time; // Fallback to raw string
     }
 
-    // HTML template with separate user details box, yellow fading border, and responsive design
+    // HTML template with larger boxes, fixed zoom, and centered layout
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -60,31 +60,33 @@ app.get('/op', (req, res) => {
             background: linear-gradient(45deg, #1a237e, #303f9f, #3f51b5);
             color: #ffffff;
             perspective: 1200px;
+            overflow: hidden; /* Prevent scroll-induced zoom */
           }
           .user-box {
-            background: linear-gradient(45deg, #4a148c, #7b1fa2); /* Purple gradient */
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            max-width: 300px;
-            width: 90%;
-            margin-bottom: 20px;
+            background: linear-gradient(45deg, #4a148c, #7b1fa2);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            max-width: 400px; /* Larger box */
+            width: 95%;
+            margin-bottom: 30px;
             transform: translateZ(40px);
             animation: fadeIn 1.5s ease forwards;
             border: 3px solid transparent;
-            border-image: linear-gradient(45deg, #ffeb3b, transparent) 1; /* Yellow fading border */
+            border-image: linear-gradient(45deg, #ffeb3b, transparent) 1;
+            text-align: center;
           }
           .container {
             text-align: center;
             background: rgba(255, 255, 255, 0.2);
-            padding: 20px;
+            padding: 25px;
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(8px);
             transform-style: preserve-3d;
             transform: rotateX(5deg) rotateY(5deg);
-            max-width: 300px;
-            width: 90%;
+            max-width: 400px; /* Larger box */
+            width: 95%;
             border: 3px solid rgba(255, 255, 255, 0.5);
             box-sizing: border-box;
             animation: waveContainer 3s infinite ease-in-out;
@@ -97,8 +99,8 @@ app.get('/op', (req, res) => {
             50% { transform: rotateX(5deg) rotateY(5deg) translateY(-6px); }
           }
           .thumbnail {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             border: 4px solid #ffffff;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
@@ -113,22 +115,22 @@ app.get('/op', (req, res) => {
             50% { transform: translateZ(60px) translateY(-5px); }
           }
           .label {
-            font-size: 0.95em;
+            font-size: 1.1em; /* Slightly larger for bigger boxes */
             font-weight: bold;
-            margin: 8px 0;
+            margin: 10px 0;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
             transform: translateZ(20px);
             animation: fadeIn 1.5s ease forwards;
           }
           button {
-            padding: 8px 15px;
-            margin: 5px;
+            padding: 10px 20px;
+            margin: 6px;
             background: linear-gradient(45deg, #ff4081, #f50057);
             color: white;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 0.8em;
+            font-size: 0.9em;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             transform: translateZ(30px) perspective(150px) rotateX(0deg);
@@ -154,8 +156,8 @@ app.get('/op', (req, res) => {
             padding: 12px;
             border-radius: 10px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            font-size: 0.85em;
-            max-width: 180px;
+            font-size: 0.9em;
+            max-width: 200px;
             opacity: 0;
             transition: opacity 0.3s ease;
             animation: none;
@@ -178,29 +180,29 @@ app.get('/op', (req, res) => {
           /* Responsive adjustments */
           @media (max-width: 600px) {
             .user-box {
-              padding: 10px;
-              max-width: 260px;
-              margin-bottom: 15px;
+              padding: 20px;
+              max-width: 340px;
+              margin-bottom: 20px;
             }
             .container {
-              padding: 15px;
-              max-width: 260px;
+              padding: 20px;
+              max-width: 340px;
             }
             .thumbnail {
-              width: 70px;
-              height: 70px;
+              width: 90px;
+              height: 90px;
             }
             .label {
-              font-size: 0.85em;
+              font-size: 1em;
             }
             button {
-              padding: 7px 12px;
-              font-size: 0.75em;
+              padding: 8px 16px;
+              font-size: 0.85em;
             }
             .popup {
-              max-width: 160px;
+              max-width: 180px;
               padding: 10px;
-              font-size: 0.8em;
+              font-size: 0.85em;
             }
           }
         </style>
@@ -214,7 +216,7 @@ app.get('/op', (req, res) => {
           <img class="thumbnail" src="${thumbnail}" alt="Teacher Thumbnail">
           <div class="label">𝗧𝗲𝗮𝗰𝗵𝗲𝗿 - ${teacher_name}</div>
           <div class="label">𝗖𝗹𝗮𝘀𝘀 𝗡𝗮𝗺𝗲 - ${class_name}</div>
-          <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 �_C𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
+          <div class="label">𝗗𝗮𝘁𝗲 𝗼𝗳 𝗖𝗹𝗮𝘀𝘀 - ${formattedDate}${is_offline === 'true' ? ' (Offline)' : ''}</div>
           <button onclick="handleDownload('${class_url}', 'class')">CLICK TO DOWNLOAD CLASS</button>
           <button onclick="handleDownload('${slides_url}', 'slides')">CLICK TO DOWNLOAD SLIDES</button>
         </div>
