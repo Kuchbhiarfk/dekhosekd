@@ -36,7 +36,7 @@ app.get('/encrypt', (req, res) => {
     live_at_time: '2025-10-09T12:15:38+00:00',
     user_first_name: 'BSDK',
     user_id: '920552552',
-    made_at: '2025-10-12T11:04:00'
+    made_at: '2025-10-11T11:04:00'
   };
 
   const jsonString = JSON.stringify(sampleData);
@@ -108,7 +108,7 @@ app.get('/op', (req, res) => {
     if (isExpired) {
       // Expired link HTML
       const expiredHtml = `
-        <!DOCTYPE html>
+               <!DOCTYPE html>
         <html lang="en">
         <head>
           <meta charset="UTF-8">
@@ -228,12 +228,12 @@ app.get('/op', (req, res) => {
       return res.send(expiredHtml);
     }
 
-    // Determine lecture URL
+    // Determine lecture URL based on is_offline
     const lectureUrl = is_offline === 'true'
       ? `https://studyuk.fun/sdv.html?url=${encodeURIComponent(class_url)}&title=${encodeURIComponent(class_name)}`
       : `http://studyuk.fun/umplayer.html?playurl=${encodeURIComponent(class_url)}&pdf=${encodeURIComponent(slides_url)}`;
 
-    // Main HTML
+    // Main HTML with countdown timer
     const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -242,7 +242,6 @@ app.get('/op', (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>${class_name}</title>
         <style>
-          /* -- Your full style code from original goes here -- */
           body {
             font-family: 'Helvetica', sans-serif;
             display: flex;
@@ -270,8 +269,177 @@ app.get('/op', (req, res) => {
             border-image: linear-gradient(45deg, #ffeb3b, transparent) 1;
             text-align: center;
           }
-          /* ...rest of your style (unchanged)... */
-          /* Put all your CSS from your code above */
+          .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            transform-style: preserve-3d;
+            transform: rotateX(5deg) rotateY(5deg);
+            max-width: 400px;
+            width: 95%;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+            animation: waveContainer 3s infinite ease-in-out;
+          }
+          .container:hover {
+            transform: rotateX(0deg) rotateY(0deg);
+          }
+          @keyframes waveContainer {
+            0%, 100% { transform: rotateX(5deg) rotateY(5deg) translateY(0); }
+            50% { transform: rotateX(5deg) rotateY(5deg) translateY(-6px); }
+          }
+          .thumbnail {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid #ffffff;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transform: translateZ(60px);
+            animation: bounceThumbnail 2s infinite ease-in-out;
+          }
+          .thumbnail:hover {
+            transform: translateZ(80px);
+          }
+          @keyframes bounceThumbnail {
+            0%, 100% { transform: translateZ(60px) translateY(0); }
+            50% { transform: translateZ(60px) translateY(-5px); }
+          }
+          .label {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            transform: translateZ(20px);
+            animation: fadeIn 1.5s ease forwards;
+          }
+          .countdown {
+            font-size: 1em;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            transform: translateZ(30px);
+            background: linear-gradient(45deg, #ffca28, #ffb300);
+            color: #1a237e;
+            padding: 8px 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            animation: pulseCountdown 2s infinite ease-in-out;
+          }
+          @keyframes pulseCountdown {
+            0%, 100% { transform: translateZ(30px) scale(1); }
+            50% { transform: translateZ(30px) scale(1.05); }
+          }
+          button {
+            padding: 12px 25px;
+            margin: 6px;
+            background: linear-gradient(135deg, #ff4081, #f50057, #d81b60);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: bold;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), inset 0 -4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            transform: translateZ(35px) perspective(200px) rotateX(0deg);
+            position: relative;
+            overflow: hidden;
+          }
+          button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+          }
+          button:hover::after {
+            width: 200px;
+            height: 200px;
+          }
+          button:hover {
+            background: linear-gradient(135deg, #f50057, #ff4081, #d81b60);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5), inset 0 -6px 12px rgba(0, 0, 0, 0.3);
+            transform: translateZ(55px) perspective(200px) rotateX(10deg);
+          }
+          button:active {
+            transform: translateZ(25px) perspective(200px) rotateX(5deg);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(0, 0, 0, 0.2);
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateZ(20px) translateY(10px); }
+            to { opacity: 1; transform: translateZ(20px) translateY(0); }
+          }
+          .popup {
+            position: fixed;
+            top: 50%;
+            right: -300px;
+            transform: translateY(-50%) translateZ(100px) perspective(500px) rotateY(-20deg);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            font-size: 0.9em;
+            max-width: 200px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            animation: none;
+          }
+          .popup.live-soon {
+            background: rgba(0, 128, 0, 0.9);
+          }
+          .popup.cancelled {
+            background: rgba(255, 0, 0, 0.9);
+          }
+          .popup.show {
+            animation: slideInOut 2s ease forwards;
+          }
+          @keyframes slideInOut {
+            0% { right: -300px; opacity: 0; transform: translateY(-50%) translateZ(100px) rotateY(-20deg); }
+            20% { right: 10px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); }
+            80% { right: 10px; opacity: 1; transform: translateY(-50%) translateZ(100px) rotateY(0deg); }
+            100% { right: -300px; opacity: 0; transform: translateY(-50%) translateZ(100px) rotateY(-20deg); }
+          }
+          /* Responsive adjustments */
+          @media (max-width: 600px) {
+            .user-box {
+              padding: 20px;
+              max-width: 340px;
+              margin-bottom: 20px;
+              border-radius: 20px;
+            }
+            .container {
+              padding: 20px;
+              max-width: 340px;
+            }
+            .thumbnail {
+              width: 90px;
+              height: 90px;
+            }
+            .label {
+              font-size: 1em;
+            }
+            .countdown {
+              font-size: 0.9em;
+              padding: 6px 12px;
+            }
+            button {
+              padding: 10px 18px;
+              font-size: 0.9em;
+            }
+            .popup {
+              max-width: 180px;
+              padding: 10px;
+              font-size: 0.85em;
+            }
+          }
         </style>
       </head>
       <body>
@@ -314,7 +482,7 @@ app.get('/op', (req, res) => {
             const now = new Date();
             const timeDiff = expiryDate - now;
             if (timeDiff <= 0) {
-              window.location.reload();
+              window.location.reload(); // Reload to show expired page
               return;
             }
             const hours = Math.floor(timeDiff / (1000 * 60 * 60));
@@ -326,8 +494,8 @@ app.get('/op', (req, res) => {
         </script>
       </body>
       </html>
-    `;
-
+    `;                    
+        
     res.send(html);
   } catch (error) {
     console.error('Error processing request:', error);
