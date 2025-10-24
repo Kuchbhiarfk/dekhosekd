@@ -5,7 +5,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Secure static key/IV for demonstration ONLY (replace with env vars in production)
-const ENCRYPTION_KEY = Buffer.from('0123456789abcdef0123456789abcdef'); // 32 bytes
+const ENCRYPTION_KEY = Buffer.from('0123456789abcdef0123456789abcdeff'); // 32 bytes
 const IV = Buffer.from('abcdef9876543210'); // 16 bytes
 
 function encrypt(text) {
