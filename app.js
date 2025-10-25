@@ -238,7 +238,7 @@ app.get('/encrypt', (req, res) => {
   `);
 });
 
-app.get('/', (req, res شیوه) => {
+app.get('/', (req, res) => {
   res.send('<h2>Dekho Sekd Opener</h2><p><a href="/encrypt">Generate Link</a></p>');
 });
 
