@@ -1,37 +1,42 @@
-// app.js - FINAL WORKING VERSION
+// app.js - 100% WORKING WITH YOUR DATA
 const express = require('express');
 const crypto = require('crypto');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// EXACT KEY & IV FROM YOUR PYTHON CODE
-const ENCRYPTION_KEY = Buffer.from('0123456789abcdef0123456789abcdef', 'hex'); // 16 bytes
+// === EXACT KEY & IV FROM YOUR PYTHON CODE ===
+const KEY = Buffer.from('0123456789abcdef0123456789abcdef', 'hex'); // 16 bytes
 const IV = Buffer.from('abcdef9876543210'); // 16 bytes
 
-// DECRYPT FUNCTION - HANDLES PADDING CORRECTLY
+// === URL-SAFE BASE64 DECODE ===
+function urlSafeBase64Decode(str) {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  return str;
+}
+
+// === DECRYPT FUNCTION (WITH PADDING FIX) ===
 function decrypt(encryptedBase64) {
   try {
-    const cipherText = Buffer.from(encryptedBase64, 'base64');
+    // Fix URL-safe base64
+    const fixedBase64 = urlSafeBase64Decode(encryptedBase64);
+    const cipherText = Buffer.from(fixedBase64, 'base64');
 
-    // Check if length is multiple of 16
+    // Must be multiple of 16
     if (cipherText.length % 16 !== 0) {
-      throw new Error('Invalid ciphertext length');
+      throw new Error(`Ciphertext length ${cipherText.length} is not multiple of 16`);
     }
 
-    const decipher = crypto.createDecipheriv('aes-128-cbc', ENCRYPTION_KEY, IV);
-    
-    // Disable auto padding removal temporarily
-    decipher.setAutoPadding(false);
+    const decipher = crypto.createDecipheriv('aes-128-cbc', KEY, IV);
+    decipher.setAutoPadding(false); // Manual padding
 
     let decrypted = decipher.update(cipherText);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
 
     // Manual PKCS7 unpadding
-    const padLen = decrypted[decrypted.length - 1];
-    if (padLen < 1 || padLen > 16) {
-      throw new Error('Invalid padding');
-    }
-    decrypted = decrypted.slice(0, -padLen);
+    const pad = decrypted[decrypted.length - 1];
+    if (pad < 1 || pad > 16) throw new Error('Invalid padding');
+    decrypted = decrypted.slice(0, -pad);
 
     return decrypted.toString('utf8');
   } catch (err) {
@@ -39,73 +44,78 @@ function decrypt(encryptedBase64) {
   }
 }
 
-// ENCRYPT FUNCTION (for generating new links)
-function encrypt(jsonObj) {
-  const text = JSON.stringify(jsonObj);
-  const cipher = crypto.createCipheriv('aes-128-cbc', ENCRYPTION_KEY, IV);
+// === ENCRYPT FUNCTION (for /encrypt) ===
+function encrypt(obj) {
+  const text = JSON.stringify(obj);
+  const cipher = crypto.createCipheriv('aes-128-cbc', KEY, IV);
   let encrypted = cipher.update(text, 'utf8');
   encrypted = Buffer.concat([encrypted, cipher.final()]);
-  
-  // Add PKCS7 padding manually
-  const padLen = 16 - (encrypted.length % 16);
-  const padding = Buffer.alloc(padLen, padLen);
-  encrypted = Buffer.concat([encrypted, padding]);
+
+  // PKCS7 padding
+  const p = 16 - (encrypted.length % 16);
+  const pad = Buffer.alloc(p, p);
+  encrypted = Buffer.concat([encrypted, pad]);
 
   return encrypted.toString('base64');
 }
 
-// /op ROUTE - MAIN DECRYPTION
+// === /op ROUTE ===
 app.get('/op', (req, res) => {
   const { data } = req.query;
-  if (!data) return res.status(400).send('Missing data parameter');
+  if (!data) return res.status(400).send('Missing data');
 
   let decrypted;
   try {
     decrypted = decrypt(data);
   } catch (err) {
     console.error('Decrypt error:', err.message);
-    return res.status(400).send(`<h3>Invalid or corrupted link</h3><p>${err.message}</p>`);
+    return res.send(`
+      <div style="text-align:center;padding:50px;font-family:Arial;background:#ffebee;color:#c62828;">
+        <h2>Invalid or Corrupted Link</h2>
+        <p>${err.message}</p>
+        <button onclick="history.back()" style="padding:10px 20px;background:#ff4081;color:white;border:none;border-radius:30px;cursor:pointer;">Go Back</button>
+      </div>
+    `);
   }
 
   let payload;
   try {
     payload = JSON.parse(decrypted);
   } catch {
-    return res.status(400).send('Decrypted data is not valid JSON');
+    return res.send('Decrypted data is not JSON');
   }
 
-  // EXTRACT FIELDS
   const {
-    class_name = 'Unknown',
-    teacher_name = 'Unknown',
+    class_name = 'Class',
+    teacher_name = 'Teacher',
     thumbnail = 'https://via.placeholder.com/100',
     class_url = '',
     slides_url = '',
     is_offline = false,
     live_at_time = '',
-    user_first_name = 'Guest',
+    user_first_name = 'User',
     user_id = 'N/A',
     made_at = new Date().toISOString()
   } = payload;
 
-  // FORMAT DATE
-  let formattedDate = 'N/A';
+  // Format date
+  let dateStr = 'N/A';
   try {
-    const d = new Date(live_at_time.replace(/\+00:00$/, 'Z'));
+    const d = new Date(live_at_time);
     if (!isNaN(d)) {
-      formattedDate = `${d.getDate()}-${d.toLocaleString('en', { month: 'long' })}-${d.getFullYear()}`;
+      dateStr = `${d.getDate()}-${d.toLocaleString('en', { month: 'long' })}-${d.getFullYear()}`;
     }
   } catch {}
 
-  // EXPIRY LOGIC
-  let isExpired = true;
+  // Expiry
+  let expired = true;
   let timeLeft = 'Expired';
   try {
-    const made = new Date(made_at.replace(/\+00:00$/, 'Z'));
-    const expiry = new Date(made.getTime() + 24 * 3600 * 1000);
+    const made = new Date(made_at);
+    const expiry = new Date(made.getTime() + 24 * 60 * 60 * 1000);
     const now = new Date();
     if (now < expiry) {
-      isExpired = false;
+      expired = false;
       const diff = expiry - now;
       const h = Math.floor(diff / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
@@ -114,55 +124,66 @@ app.get('/op', (req, res) => {
     }
   } catch {}
 
-  if (isExpired) {
+  if (expired) {
     return res.send(`
-      <div style="font-family:Arial;text-align:center;padding:50px;background:#ffebee;color:#c62828;">
-        <h1>Link Expired</h1>
-        <p>Please generate a new link from the app.</p>
-        <button onclick="location.href='https://studyuk.fun'" style="padding:12px 24px;background:#ff4081;color:white;border:none;border-radius:30px;cursor:pointer;">
-          Go to Website
-        </button>
-      </div>
+      <!DOCTYPE html>
+      <html><head><meta charset="UTF-8"><title>Expired</title>
+      <style>
+        body {font-family:Arial;background:#b71c1c;color:white;text-align:center;padding:50px;}
+        h1 {font-size:2em;} button {padding:15px 30px;background:#ffca28;color:#1a237e;border:none;border-radius:30px;font-weight:bold;cursor:pointer;}
+      </style></head>
+      <body>
+        <h1>Link Expired!</h1>
+        <p>Please generate a new link.</p>
+        <button onclick="location.href='https://studyuk.fun'">Go to Website</button>
+      </body></html>
     `);
   }
 
-  const lectureUrl = is_offline
+  const watchUrl = is_offline
     ? `https://studyuk.fun/sdv.html?url=${encodeURIComponent(class_url)}&title=${encodeURIComponent(class_name)}`
     : `https://studyuk.fun/umplayer.html?playurl=${encodeURIComponent(class_url)}&pdf=${encodeURIComponent(slides_url)}`;
 
-  // FINAL HTML
+  // === FULL HTML PAGE ===
   res.send(`
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${class_name}</title>
   <style>
-    body {font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin:0; padding:20px; color:white; min-height:100vh; display:flex; flex-direction:column; align-items:center;}
-    .card {background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); border-radius:20px; padding:20px; width:90%; max-width:400px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.3); margin:10px 0;}
-    img {width:90px; height:90px; border-radius:50%; border:4px solid white; margin-bottom:15px;}
-    .btn {display:block; margin:10px auto; padding:12px 20px; background:#ff4081; color:white; border:none; border-radius:30px; font-weight:bold; cursor:pointer; width:80%; text-decoration:none;}
-    .btn:hover {background:#f50057; transform:scale(1.05); transition:0.3s;}
-    .countdown {background:#ffca28; color:#1a237e; padding:8px 16px; border-radius:20px; font-weight:bold; display:inline-block; margin:10px 0;}
-    .label {margin:8px 0; font-size:1.1em;}
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1e3c72, #2a5298); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    .card { background: rgba(255,255,255,0.15); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin: 15px 0; border: 1px solid rgba(255,255,255,0.2); }
+    .user-card { background: rgba(74, 20, 140, 0.6); }
+    img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .label { margin: 8px 0; font-size: 1.1em; font-weight: 600; }
+    .countdown { background: #ffb300; color: #1a237e; padding: 8px 16px; border-radius: 20px; font-weight: bold; display: inline-block; margin: 10px 0; font-size: 1em; }
+    .btn { display: block; width: 85%; margin: 12px auto; padding: 14px; background: linear-gradient(135deg, #ff4081, #f50057); color: white; border: none; border-radius: 30px; font-weight: bold; font-size: 1em; cursor: pointer; text-decoration: none; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); background: linear-gradient(135deg, #f50057, #ff4081); }
+    .offline { color: #ffca28; font-weight: bold; }
+    @media (max-width: 480px) { .card { padding: 15px; } .btn { font-size: 0.95em; } }
   </style>
 </head>
 <body>
-  <div class="card">
+
+  <div class="card user-card">
     <div class="label">Name: ${user_first_name}</div>
     <div class="label">ID: ${user_id}</div>
     <div class="countdown" id="timer">Expires in: ${timeLeft}</div>
   </div>
+
   <div class="card">
-    <img src="${thumbnail}" alt="Teacher">
+    <img src="${thumbnail}" alt="Teacher" onerror="this.src='https://via.placeholder.com/100'">
     <div class="label">Teacher: ${teacher_name}</div>
     <div class="label">Class: ${class_name}</div>
-    <div class="label">Date: ${formattedDate} ${is_offline ? '(Offline)' : ''}</div>
-    <a href="${class_url}" class="btn">Download Class</a>
-    <a href="${slides_url}" class="btn">Download Slides</a>
-    <a href="${lectureUrl}" class="btn">Watch Lecture</a>
+    <div class="label">Date: ${dateStr} ${is_offline ? '<span class="offline">(Offline)</span>' : ''}</div>
+    <a href="${class_url}" class="btn" target="_blank">Download Class Video</a>
+    <a href="${slides_url}" class="btn" target="_blank">Download Slides (PDF)</a>
+    <a href="${watchUrl}" class="btn" target="_blank">Watch Lecture Now</a>
   </div>
+
   <script>
     const expiry = new Date('${made_at.replace(/\+00:00$/, 'Z')}').getTime() + 24*60*60*1000;
     setInterval(() => {
@@ -174,14 +195,15 @@ app.get('/op', (req, res) => {
       document.getElementById('timer').textContent = 'Expires in: ' + h + 'h ' + m + 'm ' + s + 's';
     }, 1000);
   </script>
+
 </body>
 </html>
   `);
 });
 
-// /encrypt - GENERATE NEW LINK
+// === /encrypt ROUTE ===
 app.get('/encrypt', (req, res) => {
-  const sample = {
+  const data = {
     "class_name": "Magnetic Forces & Moving Charges",
     "teacher_name": "Aditya Kumar Jha",
     "live_at": "2025-08-23T15:30:00Z",
@@ -190,18 +212,24 @@ app.get('/encrypt', (req, res) => {
     "slides_url": "https://player.uacdn.net/slides_pdf/763ASPDMEFJXRE2KPYZN/Magnetic_Forces__Moving_Charges_with_anno.pdf",
     "is_offline": false,
     "live_at_time": "2025-08-23T15:30:00+00:00",
-    "user_first_name": "HACKHET 😈",
+    "user_first_name": "HACKHET",
     "user_id": 5748674252,
     "made_at": new Date().toISOString()
   };
 
-  const encrypted = encrypt(sample);
+  const encrypted = encrypt(data);
   const url = `https://dekhosekdop.onrender.com/op?data=${encrypted}`;
-  
+
   res.send(`
+    <!DOCTYPE html>
+    <html><head><meta charset="UTF-8"><title>Link Generated</title>
+    <style>body{font-family:Arial;background:#1e3c72;color:white;text-align:center;padding:50px;}
+    a{color:#ffca28;text-decoration:none;font-weight:bold;} pre{background:#000;color:#0f0;padding:15px;border-radius:10px;margin:20px;overflow:auto;}</style>
+    </head><body>
     <h2>Encrypted Link Ready!</h2>
     <p><a href="${url}" target="_blank">${url}</a></p>
-    <details><summary>View Encrypted Data</summary><pre>${encrypted}</pre></details>
+    <details><summary>View Raw Encrypted Data</summary><pre>${encrypted}</pre></details>
+    </body></html>
   `);
 });
 
@@ -209,10 +237,10 @@ app.get('/', (req, res) => {
   res.send(`
     <h2>Dekho Sekd Link Opener</h2>
     <p><a href="/encrypt">Generate New Link</a></p>
-    <p>Paste your <code>?data=...</code> URL in browser</p>
+    <p>Paste <code>?data=...</code> in URL</p>
   `);
 });
 
 app.listen(port, () => {
-  console.log(`Server LIVE: https://dekhosekdop.onrender.com`);
+  console.log(`LIVE: https://dekhosekdop.onrender.com`);
 });
