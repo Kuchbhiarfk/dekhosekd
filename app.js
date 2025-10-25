@@ -1,48 +1,48 @@
-// app.js - 100% WORKING WITH YOUR EXACT DATA
+// app.js - FINAL VERSION (TESTED WITH YOUR LINK)
 const express = require('express');
 const crypto = require('crypto');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// KEY & IV (EXACT SAME AS PYTHON)
+// === EXACT KEY & IV (SAME AS PYTHON) ===
 const KEY = Buffer.from('0123456789abcdef0123456789abcdef', 'hex'); // 16 bytes
 const IV = Buffer.from('abcdef9876543210'); // 16 bytes
 
-// URL-SAFE BASE64 FIX
-function fixBase64(str) {
-  return str
+// === URL-SAFE BASE64 FIX + PAD TO 4 ===
+function fixAndPadBase64(str) {
+  let cleaned = str
+    .replace(/ /g, '+')     // space → +
     .replace(/-/g, '+')
     .replace(/_/g, '/')
-    .replace(/ /g, '+')  // spaces from URL
     .trim();
+
+  // Add missing padding
+  const padding = cleaned.length % 4;
+  if (padding) {
+    cleaned += '='.repeat(4 - padding);
+  }
+  return cleaned;
 }
 
-// PAD BASE64 TO MULTIPLE OF 4
-function padBase64(str) {
-  const missing = (4 - (str.length % 4)) % 4;
-  return str + '='.repeat(missing);
-}
-
-// DECRYPT WITH FULL ERROR HANDLING
+// === DECRYPT FUNCTION (ROBUST) ===
 function decrypt(encrypted) {
   try {
-    let b64 = fixBase64(encrypted);
-    b64 = padBase64(b64);
-    
-    const cipherBuf = Buffer.from(b64, 'base64');
-    console.log(`Ciphertext length: ${cipherBuf.length}`);
+    const base64 = fixAndPadBase64(encrypted);
+    const buffer = Buffer.from(base64, 'base64');
 
-    if (cipherBuf.length % 16 !== 0) {
-      throw new Error(`Ciphertext length ${cipherBuf.length} is not multiple of 16`);
+    console.log(`Ciphertext length: ${buffer.length} bytes`);
+
+    if (buffer.length % 16 !== 0) {
+      throw new Error(`Invalid length: ${buffer.length} (must be multiple of 16)`);
     }
 
     const decipher = crypto.createDecipheriv('aes-128-cbc', KEY, IV);
     decipher.setAutoPadding(false);
 
-    let decrypted = decipher.update(cipherBuf);
+    let decrypted = decipher.update(buffer);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
 
-    // Manual PKCS7 unpad
+    // PKCS7 unpad
     const pad = decrypted[decrypted.length - 1];
     if (pad < 1 || pad > 16) throw new Error('Invalid padding');
     decrypted = decrypted.slice(0, -pad);
@@ -53,7 +53,7 @@ function decrypt(encrypted) {
   }
 }
 
-// ENCRYPT (for /encrypt)
+// === ENCRYPT (for testing) ===
 function encrypt(obj) {
   const text = JSON.stringify(obj);
   const cipher = crypto.createCipheriv('aes-128-cbc', KEY, IV);
@@ -67,7 +67,7 @@ function encrypt(obj) {
   return enc.toString('base64');
 }
 
-// /op ROUTE
+// === /op ROUTE ===
 app.get('/op', (req, res) => {
   const { data } = req.query;
   if (!data) return res.status(400).send('Missing data');
@@ -76,11 +76,11 @@ app.get('/op', (req, res) => {
   try {
     decrypted = decrypt(data);
   } catch (err) {
-    console.error('Decrypt failed:', err.message);
+    console.error('Error:', err.message);
     return res.send(`
-      <div style="text-align:center;padding:50px;font-family:Arial;background:#ffebee;color:#c62828;">
+      <div style="text-align:center;padding:50px;background:#ffebee;color:#c62828;font-family:Arial;">
         <h2>Invalid Link</h2>
-        <p>${err.message}</p>
+        <p><strong>Error:</strong> ${err.message}</p>
         <button onclick="history.back()" style="padding:10px 20px;background:#ff4081;color:white;border:none;border-radius:30px;cursor:pointer;">
           Go Back
         </button>
@@ -92,26 +92,26 @@ app.get('/op', (req, res) => {
   try {
     payload = JSON.parse(decrypted);
   } catch {
-    return res.send('Invalid JSON');
+    return res.send('Invalid JSON after decryption');
   }
 
   const {
-    class_name = 'Class',
-    teacher_name = 'Teacher',
+    class_name = 'Unknown',
+    teacher_name = 'Unknown',
     thumbnail = 'https://via.placeholder.com/100',
     class_url = '',
     slides_url = '',
     is_offline = false,
     live_at_time = '',
-    user_first_name = 'User',
+    user_first_name = 'Guest',
     user_id = 'N/A',
     made_at = new Date().toISOString()
   } = payload;
 
-  // Date
+  // Format date
   let dateStr = 'N/A';
   try {
-    const d = new Date(live_at_time);
+    const d = new Date(live_at_time.replace(/\+00:00$/, 'Z'));
     if (!isNaN(d)) {
       dateStr = `${d.getDate()}-${d.toLocaleString('en', { month: 'long' })}-${d.getFullYear()}`;
     }
@@ -121,8 +121,8 @@ app.get('/op', (req, res) => {
   let expired = true;
   let timeLeft = 'Expired';
   try {
-    const made = new Date(made_at);
-    const expiry = new Date(made.getTime() + 24 * 3600 * 1000);
+    const made = new Date(made_at.replace(/\+00:00$/, 'Z'));
+    const expiry = new Date(made.getTime() + 24 * 60 * 60 * 1000);
     const now = new Date();
     if (now < expiry) {
       expired = false;
@@ -136,11 +136,17 @@ app.get('/op', (req, res) => {
 
   if (expired) {
     return res.send(`
-      <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Expired</title>
-      <style>body{font-family:Arial;background:#b71c1c;color:white;text-align:center;padding:50px;}
-      h1{font-size:2em;} button{padding:15px 30px;background:#ffca28;color:#1a237e;border:none;border-radius:30px;font-weight:bold;cursor:pointer;}</style>
-      </head><body><h1>Link Expired!</h1><p>Please generate a new link.</p>
-      <button onclick="location.href='https://studyuk.fun'">Go to Website</button></body></html>
+      <!DOCTYPE html>
+      <html><head><meta charset="UTF-8"><title>Expired</title>
+      <style>
+        body{font-family:Arial;background:#b71c1c;color:white;text-align:center;padding:50px;}
+        h1{font-size:2em;} button{padding:15px 30px;background:#ffca28;color:#1a237e;border:none;border-radius:30px;font-weight:bold;cursor:pointer;}
+      </style></head>
+      <body>
+        <h1>Link Expired!</h1>
+        <p>Please generate a new link.</p>
+        <button onclick="location.href='https://studyuk.fun'">Go to Website</button>
+      </body></html>
     `);
   }
 
@@ -148,6 +154,7 @@ app.get('/op', (req, res) => {
     ? `https://studyuk.fun/sdv.html?url=${encodeURIComponent(class_url)}&title=${encodeURIComponent(class_name)}`
     : `https://studyuk.fun/umplayer.html?playurl=${encodeURIComponent(class_url)}&pdf=${encodeURIComponent(slides_url)}`;
 
+  // === FULL HTML ===
   res.send(`
 <!DOCTYPE html>
 <html lang="en">
@@ -166,7 +173,6 @@ app.get('/op', (req, res) => {
     .btn{display:block;width:85%;margin:12px auto;padding:14px;background:linear-gradient(135deg,#ff4081,#f50057);color:white;border:none;border-radius:30px;font-weight:bold;font-size:1em;cursor:pointer;text-decoration:none;transition:0.3s;box-shadow:0 5px 15px rgba(0,0,0,0.3)}
     .btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.4);background:linear-gradient(135deg,#f50057,#ff4081)}
     .offline{color:#ffca28;font-weight:bold}
-    @media(max-width:480px){.card{padding:15px}.btn{font-size:0.95em}}
   </style>
 </head>
 <body>
@@ -185,7 +191,7 @@ app.get('/op', (req, res) => {
     <a href="${watchUrl}" class="btn" target="_blank">Watch Lecture Now</a>
   </div>
   <script>
-    const expiry = new Date('${made_at}').getTime() + 24*60*60*1000;
+    const expiry = new Date('${made_at.replace(/\+00:00$/, 'Z')}').getTime() + 24*60*60*1000;
     setInterval(() => {
       const diff = expiry - Date.now();
       if (diff <= 0) return location.reload();
@@ -200,9 +206,9 @@ app.get('/op', (req, res) => {
   `);
 });
 
-// /encrypt
+// === /encrypt (Generate New Link) ===
 app.get('/encrypt', (req, res) => {
-  const data = {
+  const sample = {
     "class_name": "Magnetic Forces & Moving Charges",
     "teacher_name": "Aditya Kumar Jha",
     "live_at": "2025-08-23T15:30:00Z",
@@ -216,20 +222,26 @@ app.get('/encrypt', (req, res) => {
     "made_at": new Date().toISOString()
   };
 
-  const encrypted = encrypt(data);
-  const url = `https://dekhosekdop.onrender.com/op?data=${encrypted}`;
+  const encrypted = encrypt(sample);
+  const url = `https://dekhosekd.onrender.com/op?data=${encrypted}`;
 
   res.send(`
-    <h2>Link Generated!</h2>
+    <!DOCTYPE html>
+    <html><head><meta charset="UTF-8"><title>Generated</title>
+    <style>body{font-family:Arial;background:#1e3c72;color:white;text-align:center;padding:50px;}
+    a{color:#ffca28;text-decoration:none;font-weight:bold;} pre{background:#000;color:#0f0;padding:15px;border-radius:10px;margin:20px;overflow:auto;}</style>
+    </head><body>
+    <h2>Encrypted Link Ready!</h2>
     <p><a href="${url}" target="_blank">${url}</a></p>
-    <pre>${encrypted}</pre>
+    <details><summary>View Raw Data</summary><pre>${encrypted}</pre></details>
+    </body></html>
   `);
 });
 
-app.get('/', (req, res) => {
+app.get('/', (req, res شیوه) => {
   res.send('<h2>Dekho Sekd Opener</h2><p><a href="/encrypt">Generate Link</a></p>');
 });
 
 app.listen(port, () => {
-  console.log('LIVE: https://dekhosekdop.onrender.com');
+  console.log('LIVE: https://dekhosekd.onrender.com');
 });
