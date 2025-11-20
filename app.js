@@ -1,4 +1,4 @@
-// app.js - FINAL PERFECT VERSION
+// app.js - FIXED DECRYPTION ISSUE
 const express = require('express');
 const crypto = require('crypto');
 const app = express();
@@ -23,7 +23,7 @@ function fixAndPadBase64(str) {
   return cleaned;
 }
 
-// === DECRYPT FUNCTION ===
+// === IMPROVED DECRYPT FUNCTION - HANDLES PADDING BETTER ===
 function decrypt(encrypted) {
   try {
     const base64 = fixAndPadBase64(encrypted);
@@ -35,18 +35,49 @@ function decrypt(encrypted) {
       throw new Error(`Invalid length: ${buffer.length} (must be multiple of 16)`);
     }
 
+    // Try with auto padding first (most common)
+    try {
+      const decipher = crypto.createDecipheriv('aes-128-cbc', KEY, IV);
+      decipher.setAutoPadding(true);
+      let decrypted = decipher.update(buffer);
+      decrypted = Buffer.concat([decrypted, decipher.final()]);
+      const result = decrypted.toString('utf8');
+      console.log('✅ Decryption successful with auto-padding');
+      return result;
+    } catch (autoPadErr) {
+      console.log('⚠️ Auto-padding failed, trying manual padding...');
+    }
+
+    // Fallback to manual padding
     const decipher = crypto.createDecipheriv('aes-128-cbc', KEY, IV);
     decipher.setAutoPadding(false);
 
     let decrypted = decipher.update(buffer);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
 
+    // PKCS7 unpad - More robust
     const pad = decrypted[decrypted.length - 1];
-    if (pad < 1 || pad > 16) throw new Error('Invalid padding');
-    decrypted = decrypted.slice(0, -pad);
+    if (pad >= 1 && pad <= 16) {
+      // Verify all padding bytes are correct
+      let validPadding = true;
+      for (let i = 0; i < pad; i++) {
+        if (decrypted[decrypted.length - 1 - i] !== pad) {
+          validPadding = false;
+          break;
+        }
+      }
+      
+      if (validPadding) {
+        decrypted = decrypted.slice(0, -pad);
+        console.log('✅ Manual padding successful');
+      } else {
+        console.log('⚠️ Invalid padding bytes, returning as-is');
+      }
+    }
 
     return decrypted.toString('utf8');
   } catch (err) {
+    console.error('❌ Decryption error:', err.message);
     throw new Error('Decryption failed: ' + err.message);
   }
 }
@@ -55,13 +86,9 @@ function decrypt(encrypted) {
 function encrypt(obj) {
   const text = JSON.stringify(obj);
   const cipher = crypto.createCipheriv('aes-128-cbc', KEY, IV);
+  cipher.setAutoPadding(true); // Use auto-padding
   let enc = cipher.update(text, 'utf8');
   enc = Buffer.concat([enc, cipher.final()]);
-
-  const p = 16 - (enc.length % 16);
-  const pad = Buffer.alloc(p, p);
-  enc = Buffer.concat([enc, pad]);
-
   return enc.toString('base64');
 }
 
@@ -73,6 +100,7 @@ app.get('/op', (req, res) => {
   let decrypted;
   try {
     decrypted = decrypt(data);
+    console.log('Decrypted data:', decrypted.substring(0, 100) + '...');
   } catch (err) {
     console.error('Error:', err.message);
     return res.send(`
@@ -84,14 +112,21 @@ app.get('/op', (req, res) => {
         body{font-family:Arial,sans-serif;background:#f44336;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
         .error-box{background:#fff;color:#333;padding:30px;border-radius:10px;text-align:center;max-width:500px;width:100%}
         .error-box h2{color:#f44336;margin-bottom:15px}
-        .error-box p{margin:10px 0;color:#666}
+        .error-box p{margin:10px 0;color:#666;word-break:break-word}
         .btn{margin-top:20px;padding:12px 30px;background:#f44336;color:white;border:none;border-radius:5px;cursor:pointer;font-size:1em;font-weight:600}
+        .debug{background:#f5f5f5;padding:10px;border-radius:5px;margin-top:15px;font-size:0.85em;text-align:left;overflow:auto}
       </style>
       </head><body>
         <div class="error-box">
           <h2>❌ Invalid Link</h2>
           <p><strong>Error:</strong> ${err.message}</p>
+          <div class="debug">
+            <strong>Debug Info:</strong><br>
+            Data Length: ${data.length}<br>
+            First 50 chars: ${data.substring(0, 50)}...
+          </div>
           <button class="btn" onclick="history.back()">Go Back</button>
+          <button class="btn" onclick="location.href='/'">Home</button>
         </div>
       </body></html>
     `);
@@ -100,8 +135,34 @@ app.get('/op', (req, res) => {
   let payload;
   try {
     payload = JSON.parse(decrypted);
-  } catch {
-    return res.send('Invalid JSON after decryption');
+    console.log('Parsed payload:', Object.keys(payload));
+  } catch (parseErr) {
+    console.error('JSON parse error:', parseErr.message);
+    return res.send(`
+      <!DOCTYPE html>
+      <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Invalid Data</title>
+      <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Arial,sans-serif;background:#ff9800;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .error-box{background:#fff;color:#333;padding:30px;border-radius:10px;text-align:center;max-width:600px;width:100%}
+        .error-box h2{color:#ff9800;margin-bottom:15px}
+        .error-box p{margin:10px 0;color:#666}
+        .btn{margin-top:20px;padding:12px 30px;background:#ff9800;color:white;border:none;border-radius:5px;cursor:pointer;font-size:1em;font-weight:600}
+        pre{background:#f5f5f5;padding:15px;border-radius:5px;overflow:auto;text-align:left;font-size:0.8em;margin-top:15px}
+      </style>
+      </head><body>
+        <div class="error-box">
+          <h2>⚠️ Invalid JSON Data</h2>
+          <p>Decryption successful but data is not valid JSON</p>
+          <details>
+            <summary>View Decrypted Data</summary>
+            <pre>${decrypted}</pre>
+          </details>
+          <button class="btn" onclick="history.back()">Go Back</button>
+        </div>
+      </body></html>
+    `);
   }
 
   const {
@@ -207,7 +268,6 @@ app.get('/op', (req, res) => {
       margin: 0 auto;
     }
 
-    /* Card Styling - Simple 2D */
     .card {
       background: #fff;
       border: 1px solid #e0e0e0;
@@ -216,7 +276,6 @@ app.get('/op', (req, res) => {
       margin-bottom: 15px;
     }
 
-    /* User Card */
     .user-card {
       background: #5e35b1;
       color: #fff;
@@ -245,7 +304,6 @@ app.get('/op', (req, res) => {
       font-size: 0.95em;
     }
 
-    /* Class Card */
     .class-card {
       text-align: center;
     }
@@ -281,7 +339,6 @@ app.get('/op', (req, res) => {
       font-weight: 500;
     }
 
-    /* Buttons - Simple 2D */
     .btn {
       display: block;
       width: 100%;
@@ -330,7 +387,6 @@ app.get('/op', (req, res) => {
       color: #fff;
     }
 
-    /* Popup - Right to Left Slide */
     .popup {
       position: fixed;
       top: 20px;
@@ -369,7 +425,6 @@ app.get('/op', (req, res) => {
       }
     }
 
-    /* Footer */
     .footer {
       margin-top: 30px;
       text-align: center;
@@ -377,7 +432,6 @@ app.get('/op', (req, res) => {
       font-size: 0.9em;
     }
 
-    /* Mobile Responsive */
     @media (max-width: 768px) {
       body {
         padding: 15px;
@@ -429,7 +483,6 @@ app.get('/op', (req, res) => {
       }
     }
 
-    /* Desktop Extra Wide */
     @media (min-width: 1200px) {
       .container {
         max-width: 700px;
@@ -468,14 +521,12 @@ app.get('/op', (req, res) => {
   ` : ''}
 
   <div class="container">
-    <!-- User Card -->
     <div class="card user-card">
       <h3>Hello, ${user_first_name}!</h3>
       <div class="user-id">ID: ${user_id}</div>
       <div class="countdown" id="timer">Expires in: ${timeLeft}</div>
     </div>
 
-    <!-- Class Card -->
     <div class="card class-card">
       <img src="${thumbnail}" alt="${teacher_name}" class="teacher-img" onerror="this.src='https://via.placeholder.com/100'">
       
@@ -506,7 +557,6 @@ app.get('/op', (req, res) => {
   </div>
 
   <script>
-    // Countdown Timer
     const expiry = new Date('${made_at.replace(/\+00:00$/, 'Z')}').getTime() + 24*60*60*1000;
     
     function updateTimer() {
@@ -525,7 +575,6 @@ app.get('/op', (req, res) => {
     
     setInterval(updateTimer, 1000);
 
-    // Auto-hide popup after 5 seconds
     const popup = document.getElementById('popup');
     if (popup) {
       setTimeout(() => {
@@ -539,7 +588,7 @@ app.get('/op', (req, res) => {
   `);
 });
 
-// === /encrypt (Generate New Link) ===
+// === /encrypt ===
 app.get('/encrypt', (req, res) => {
   const sample = {
     "class_name": "Magnetic Forces & Moving Charges",
@@ -556,7 +605,7 @@ app.get('/encrypt', (req, res) => {
   };
 
   const encrypted = encrypt(sample);
-  const url = `https://dekhosekd.onrender.com/op?data=${encrypted}`;
+  const url = `https://dekhosekd-psll.onrender.com/op?data=${encrypted}`;
 
   res.send(`
     <!DOCTYPE html>
@@ -592,7 +641,7 @@ app.get('/encrypt', (req, res) => {
   `);
 });
 
-// === Home Route ===
+// === Home ===
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
