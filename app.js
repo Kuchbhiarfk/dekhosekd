@@ -1,4 +1,4 @@
-// app.js - FULL CODE WITH AWESOME UI & POPUPS
+// app.js - FINAL PERFECT VERSION
 const express = require('express');
 const crypto = require('crypto');
 const app = express();
@@ -81,12 +81,11 @@ app.get('/op', (req, res) => {
       <title>Invalid Link</title>
       <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Poppins',sans-serif;background:#1a1a2e;color:#eee;min-height:100vh;display:flex;align-items:center;justify-content:center}
-        .error-box{background:#fff;color:#333;padding:40px;border-radius:15px;text-align:center;max-width:500px;box-shadow:0 10px 40px rgba(0,0,0,0.3)}
-        .error-box h2{color:#e74c3c;margin-bottom:15px}
-        .error-box p{margin:10px 0;color:#555}
-        .btn{margin-top:20px;padding:12px 30px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:1em;font-weight:600;transition:0.3s}
-        .btn:hover{background:#c0392b;transform:translateY(-2px)}
+        body{font-family:Arial,sans-serif;background:#f44336;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .error-box{background:#fff;color:#333;padding:30px;border-radius:10px;text-align:center;max-width:500px;width:100%}
+        .error-box h2{color:#f44336;margin-bottom:15px}
+        .error-box p{margin:10px 0;color:#666}
+        .btn{margin-top:20px;padding:12px 30px;background:#f44336;color:white;border:none;border-radius:5px;cursor:pointer;font-size:1em;font-weight:600}
       </style>
       </head><body>
         <div class="error-box">
@@ -151,12 +150,11 @@ app.get('/op', (req, res) => {
       <title>Link Expired</title>
       <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
-        .expired-box{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);padding:50px;border-radius:20px;border:2px solid rgba(255,255,255,0.2)}
-        h1{font-size:3em;margin-bottom:20px}
-        p{font-size:1.2em;margin:15px 0}
-        .btn{margin-top:30px;padding:15px 40px;background:#fff;color:#667eea;border:none;border-radius:50px;font-weight:bold;cursor:pointer;font-size:1.1em;transition:0.3s}
-        .btn:hover{transform:scale(1.05);box-shadow:0 5px 20px rgba(255,255,255,0.3)}
+        body{font-family:Arial,sans-serif;background:#ff9800;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
+        .expired-box{background:#fff;color:#333;padding:40px;border-radius:10px;max-width:500px;width:100%}
+        h1{font-size:2.5em;margin-bottom:20px;color:#ff9800}
+        p{font-size:1.1em;margin:10px 0;color:#666}
+        .btn{margin-top:30px;padding:15px 40px;background:#ff9800;color:#fff;border:none;border-radius:5px;font-weight:bold;cursor:pointer;font-size:1em}
       </style></head>
       <body>
         <div class="expired-box">
@@ -177,7 +175,7 @@ app.get('/op', (req, res) => {
     ? `https://studyuk.fun/sdv.html?url=${encodeURIComponent(class_url)}&title=${encodeURIComponent(class_name)}`
     : `https://studyuk.fun/umplayer.html?playurl=${encodeURIComponent(class_url)}&pdf=${encodeURIComponent(slides_url)}`;
 
-  // === FULL HTML WITH AWESOME UI ===
+  // === FULL HTML - CLEAN 2D DESIGN ===
   res.send(`
 <!DOCTYPE html>
 <html lang="en">
@@ -185,7 +183,6 @@ app.get('/op', (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${class_name}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -194,45 +191,43 @@ app.get('/op', (req, res) => {
     }
 
     body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
       min-height: 100vh;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
       color: #333;
     }
 
     .container {
       width: 100%;
-      max-width: 450px;
-      margin: 10px 0;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
+    /* Card Styling - Simple 2D */
     .card {
       background: #fff;
-      border-radius: 15px;
-      padding: 25px;
-      margin: 15px 0;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-      transition: transform 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
     }
 
     /* User Card */
     .user-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: #5e35b1;
+      color: #fff;
       text-align: center;
+      border: none;
     }
 
     .user-card h3 {
-      font-size: 1.5em;
-      margin-bottom: 10px;
+      font-size: 1.3em;
+      margin-bottom: 8px;
+      font-weight: 600;
     }
 
     .user-id {
@@ -243,11 +238,11 @@ app.get('/op', (req, res) => {
 
     .countdown {
       background: rgba(255, 255, 255, 0.2);
-      padding: 10px 20px;
-      border-radius: 25px;
+      padding: 8px 16px;
+      border-radius: 5px;
       font-weight: 600;
       display: inline-block;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      font-size: 0.95em;
     }
 
     /* Class Card */
@@ -256,117 +251,110 @@ app.get('/op', (req, res) => {
     }
 
     .teacher-img {
-      width: 100px;
-      height: 100px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
-      border: 4px solid #667eea;
-      margin: 0 auto 15px;
+      border: 3px solid #5e35b1;
+      margin: 0 auto 20px;
       display: block;
       object-fit: cover;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
-    .class-info {
-      margin: 12px 0;
+    .info-row {
+      margin: 15px 0;
+      text-align: left;
     }
 
-    .class-info label {
-      font-weight: 600;
-      color: #667eea;
+    .info-row label {
       display: block;
       font-size: 0.85em;
-      text-transform: uppercase;
+      color: #666;
       margin-bottom: 5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .class-info span {
+    .info-row .value {
       font-size: 1.1em;
       color: #333;
       font-weight: 500;
     }
 
-    .offline-badge {
-      display: inline-block;
-      background: #f39c12;
-      color: white;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 0.8em;
-      margin-left: 8px;
-      font-weight: 600;
-    }
-
-    /* Buttons */
+    /* Buttons - Simple 2D */
     .btn {
       display: block;
       width: 100%;
       padding: 14px;
-      margin: 12px 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      margin: 10px 0;
+      background: #5e35b1;
+      color: #fff;
       border: none;
-      border-radius: 10px;
+      border-radius: 5px;
       font-weight: 600;
       font-size: 1em;
       cursor: pointer;
       text-decoration: none;
       text-align: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: background 0.3s ease;
     }
 
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
-
-    .btn:active {
-      transform: translateY(0);
+      background: #4527a0;
     }
 
     .btn-secondary {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+      background: #f57c00;
     }
 
     .btn-secondary:hover {
-      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+      background: #e65100;
     }
 
     .btn-success {
-      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-      box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4);
+      background: #43a047;
     }
 
     .btn-success:hover {
-      box-shadow: 0 6px 20px rgba(67, 233, 123, 0.6);
+      background: #2e7d32;
     }
 
-    /* Popup Notification */
+    .btn-outline {
+      background: #fff;
+      color: #5e35b1;
+      border: 2px solid #5e35b1;
+    }
+
+    .btn-outline:hover {
+      background: #5e35b1;
+      color: #fff;
+    }
+
+    /* Popup - Right to Left Slide */
     .popup {
       position: fixed;
       top: 20px;
       right: -400px;
-      background: #e74c3c;
-      color: white;
-      padding: 20px 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      background: #f44336;
+      color: #fff;
+      padding: 18px 25px;
+      border-radius: 8px;
       z-index: 9999;
       font-weight: 600;
-      font-size: 1.1em;
+      font-size: 1em;
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
+      min-width: 300px;
       animation: slideIn 0.5s forwards, slideOut 0.5s 4.5s forwards;
     }
 
     .popup.success {
-      background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+      background: #4caf50;
     }
 
     .popup-icon {
-      font-size: 1.8em;
+      font-size: 1.5em;
     }
 
     @keyframes slideIn {
@@ -385,15 +373,22 @@ app.get('/op', (req, res) => {
     .footer {
       margin-top: 30px;
       text-align: center;
-      color: white;
+      color: #999;
       font-size: 0.9em;
-      opacity: 0.8;
     }
 
-    /* Responsive */
-    @media (max-width: 500px) {
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+
       .card {
-        padding: 20px;
+        padding: 18px;
+      }
+
+      .user-card h3 {
+        font-size: 1.2em;
       }
 
       .teacher-img {
@@ -401,9 +396,23 @@ app.get('/op', (req, res) => {
         height: 80px;
       }
 
+      .info-row label {
+        font-size: 0.8em;
+      }
+
+      .info-row .value {
+        font-size: 1em;
+      }
+
+      .btn {
+        padding: 13px;
+        font-size: 0.95em;
+      }
+
       .popup {
         right: -350px;
-        font-size: 1em;
+        min-width: 250px;
+        font-size: 0.9em;
         padding: 15px 20px;
       }
 
@@ -417,6 +426,27 @@ app.get('/op', (req, res) => {
         to {
           right: -350px;
         }
+      }
+    }
+
+    /* Desktop Extra Wide */
+    @media (min-width: 1200px) {
+      .container {
+        max-width: 700px;
+      }
+
+      .card {
+        padding: 30px;
+      }
+
+      .teacher-img {
+        width: 110px;
+        height: 110px;
+      }
+
+      .btn {
+        padding: 16px;
+        font-size: 1.05em;
       }
     }
   </style>
@@ -438,41 +468,41 @@ app.get('/op', (req, res) => {
   ` : ''}
 
   <div class="container">
-    <!-- User Info Card -->
+    <!-- User Card -->
     <div class="card user-card">
-      <h3>👋 Hello, ${user_first_name}!</h3>
+      <h3>Hello, ${user_first_name}!</h3>
       <div class="user-id">ID: ${user_id}</div>
-      <div class="countdown" id="timer">⏳ Expires in: ${timeLeft}</div>
+      <div class="countdown" id="timer">Expires in: ${timeLeft}</div>
     </div>
 
-    <!-- Class Info Card -->
+    <!-- Class Card -->
     <div class="card class-card">
       <img src="${thumbnail}" alt="${teacher_name}" class="teacher-img" onerror="this.src='https://via.placeholder.com/100'">
       
-      <div class="class-info">
-        <label>👨‍🏫 Teacher</label>
-        <span>${teacher_name}</span>
+      <div class="info-row">
+        <label>Teacher</label>
+        <div class="value">${teacher_name}</div>
       </div>
 
-      <div class="class-info">
-        <label>📚 Class Name</label>
-        <span>${class_name}</span>
+      <div class="info-row">
+        <label>Class Name</label>
+        <div class="value">${class_name}</div>
       </div>
 
-      <div class="class-info">
-        <label>📅 Date</label>
-        <span>${dateStr}${is_offline ? '<span class="offline-badge">Offline</span>' : ''}</span>
+      <div class="info-row">
+        <label>Date</label>
+        <div class="value">${dateStr}</div>
       </div>
 
       <a href="${class_url}" class="btn" target="_blank">📥 Download Class Video</a>
       <a href="${slides_url}" class="btn btn-secondary" target="_blank">📄 Download Slides (PDF)</a>
       <a href="${watchUrl}" class="btn btn-success" target="_blank">▶️ Watch Lecture Now</a>
+      <a href="https://studyuk.fun" class="btn btn-outline" target="_blank">🌐 Visit Website</a>
     </div>
   </div>
 
   <div class="footer">
-    Made with ❤️ by HACKHET<br>
-    Powered by StudyUK
+    Made with ❤️ by HACKHET | Powered by StudyUK
   </div>
 
   <script>
@@ -490,7 +520,7 @@ app.get('/op', (req, res) => {
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
       
-      document.getElementById('timer').textContent = '⏳ Expires in: ' + h + 'h ' + m + 'm ' + s + 's';
+      document.getElementById('timer').textContent = 'Expires in: ' + h + 'h ' + m + 'm ' + s + 's';
     }
     
     setInterval(updateTimer, 1000);
@@ -532,19 +562,18 @@ app.get('/encrypt', (req, res) => {
     <!DOCTYPE html>
     <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generated Link</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
       *{margin:0;padding:0;box-sizing:border-box}
-      body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-      .container{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);padding:40px;border-radius:20px;max-width:700px;border:2px solid rgba(255,255,255,0.2)}
-      h2{margin-bottom:20px;font-size:2em}
-      .link-box{background:#fff;color:#333;padding:15px;border-radius:10px;margin:20px 0;word-break:break-all;font-size:0.9em}
-      .link-box a{color:#667eea;font-weight:600;text-decoration:none}
-      .btn{padding:12px 30px;background:#fff;color:#667eea;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin:10px 5px;transition:0.3s}
-      .btn:hover{transform:scale(1.05)}
-      details{margin-top:20px;background:rgba(0,0,0,0.2);padding:15px;border-radius:10px}
-      summary{cursor:pointer;font-weight:600;margin-bottom:10px}
-      pre{background:#000;color:#0f0;padding:15px;border-radius:8px;overflow:auto;font-size:0.8em}
+      body{font-family:Arial,sans-serif;background:#5e35b1;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+      .container{background:#fff;color:#333;padding:30px;border-radius:8px;max-width:700px;width:100%}
+      h2{margin-bottom:20px;font-size:1.8em;color:#5e35b1}
+      .link-box{background:#f5f5f5;border:1px solid #ddd;padding:15px;border-radius:5px;margin:20px 0;word-break:break-all;font-size:0.9em}
+      .link-box a{color:#5e35b1;font-weight:600;text-decoration:none}
+      .btn{padding:12px 25px;background:#5e35b1;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:600;margin:10px 5px;font-size:1em}
+      .btn:hover{background:#4527a0}
+      details{margin-top:20px;background:#f5f5f5;padding:15px;border-radius:5px;border:1px solid #ddd}
+      summary{cursor:pointer;font-weight:600;margin-bottom:10px;color:#5e35b1}
+      pre{background:#000;color:#0f0;padding:15px;border-radius:5px;overflow:auto;font-size:0.8em;margin-top:10px}
     </style>
     </head><body>
     <div class="container">
@@ -569,15 +598,14 @@ app.get('/', (req, res) => {
     <!DOCTYPE html>
     <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dekho Sekd Opener</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
       *{margin:0;padding:0;box-sizing:border-box}
-      body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
-      .box{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);padding:60px 40px;border-radius:25px;border:2px solid rgba(255,255,255,0.2)}
-      h1{font-size:2.5em;margin-bottom:15px}
-      p{font-size:1.2em;margin-bottom:30px;opacity:0.9}
-      .btn{padding:15px 40px;background:#fff;color:#667eea;border:none;border-radius:50px;font-weight:bold;font-size:1.1em;cursor:pointer;text-decoration:none;display:inline-block;transition:0.3s}
-      .btn:hover{transform:scale(1.1);box-shadow:0 10px 30px rgba(255,255,255,0.3)}
+      body{font-family:Arial,sans-serif;background:#5e35b1;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
+      .box{background:#fff;color:#333;padding:50px 40px;border-radius:8px;max-width:500px;width:100%}
+      h1{font-size:2.2em;margin-bottom:15px;color:#5e35b1}
+      p{font-size:1.1em;margin-bottom:30px;color:#666}
+      .btn{padding:15px 40px;background:#5e35b1;color:#fff;border:none;border-radius:5px;font-weight:bold;font-size:1em;cursor:pointer;text-decoration:none;display:inline-block}
+      .btn:hover{background:#4527a0}
     </style></head>
     <body>
       <div class="box">
