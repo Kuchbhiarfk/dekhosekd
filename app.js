@@ -1,4 +1,4 @@
-// app.js - FIXED DECRYPTION ISSUE
+// app.js - UPDATED WITH POPUP CHANGES
 const express = require('express');
 const crypto = require('crypto');
 const app = express();
@@ -86,7 +86,7 @@ function decrypt(encrypted) {
 function encrypt(obj) {
   const text = JSON.stringify(obj);
   const cipher = crypto.createCipheriv('aes-128-cbc', KEY, IV);
-  cipher.setAutoPadding(true); // Use auto-padding
+  cipher.setAutoPadding(true);
   let enc = cipher.update(text, 'utf8');
   enc = Buffer.concat([enc, cipher.final()]);
   return enc.toString('base64');
@@ -126,7 +126,6 @@ app.get('/op', (req, res) => {
             First 50 chars: ${data.substring(0, 50)}...
           </div>
           <button class="btn" onclick="history.back()">Go Back</button>
-          <button class="btn" onclick="location.href='/'">Home</button>
         </div>
       </body></html>
     `);
@@ -228,15 +227,11 @@ app.get('/op', (req, res) => {
     `);
   }
 
-  // Check for Class Cancelled or Live Soon
-  const isCancelled = class_url === 'Class Cancelled' || slides_url === 'Class Cancelled';
-  const isLiveSoon = class_url === 'Live Soon' || slides_url === 'Live Soon';
-
   const watchUrl = is_offline
     ? `https://studyuk.fun/sdv.html?url=${encodeURIComponent(class_url)}&title=${encodeURIComponent(class_name)}`
     : `https://studyuk.fun/umplayer.html?playurl=${encodeURIComponent(class_url)}&pdf=${encodeURIComponent(slides_url)}`;
 
-  // === FULL HTML - CLEAN 2D DESIGN ===
+  // === FULL HTML - WITH POPUP LOGIC ===
   res.send(`
 <!DOCTYPE html>
 <html lang="en">
@@ -387,42 +382,84 @@ app.get('/op', (req, res) => {
       color: #fff;
     }
 
-    .popup {
+    /* Popup Modal */
+    .popup-modal {
       position: fixed;
-      top: 20px;
-      right: -400px;
-      background: #f44336;
-      color: #fff;
-      padding: 18px 25px;
-      border-radius: 8px;
-      z-index: 9999;
-      font-weight: 600;
-      font-size: 1em;
-      display: flex;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
       align-items: center;
-      gap: 12px;
-      min-width: 300px;
-      animation: slideIn 0.5s forwards, slideOut 0.5s 4.5s forwards;
+      justify-content: center;
+      z-index: 9999;
     }
 
-    .popup.success {
-      background: #4caf50;
+    .popup-modal.active {
+      display: flex;
     }
 
-    .popup-icon {
-      font-size: 1.5em;
+    .popup-content {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      animation: popupSlide 0.3s ease;
     }
 
-    @keyframes slideIn {
+    @keyframes popupSlide {
+      from {
+        transform: scale(0.7);
+        opacity: 0;
+      }
       to {
-        right: 20px;
+        transform: scale(1);
+        opacity: 1;
       }
     }
 
-    @keyframes slideOut {
-      to {
-        right: -400px;
-      }
+    .popup-content .popup-icon {
+      font-size: 4em;
+      margin-bottom: 20px;
+    }
+
+    .popup-content h2 {
+      margin-bottom: 15px;
+      color: #333;
+      font-size: 1.6em;
+    }
+
+    .popup-content p {
+      margin-bottom: 25px;
+      color: #666;
+      font-size: 1.1em;
+    }
+
+    .popup-close {
+      padding: 12px 35px;
+      background: #5e35b1;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s ease;
+    }
+
+    .popup-close:hover {
+      background: #4527a0;
+    }
+
+    .popup-content.cancelled .popup-icon {
+      color: #f44336;
+    }
+
+    .popup-content.live-soon .popup-icon {
+      color: #4caf50;
     }
 
     .footer {
@@ -463,23 +500,20 @@ app.get('/op', (req, res) => {
         font-size: 0.95em;
       }
 
-      .popup {
-        right: -350px;
-        min-width: 250px;
-        font-size: 0.9em;
-        padding: 15px 20px;
+      .popup-content {
+        padding: 30px 25px;
       }
 
-      @keyframes slideIn {
-        to {
-          right: 10px;
-        }
+      .popup-content h2 {
+        font-size: 1.4em;
       }
 
-      @keyframes slideOut {
-        to {
-          right: -350px;
-        }
+      .popup-content p {
+        font-size: 1em;
+      }
+
+      .popup-content .popup-icon {
+        font-size: 3.5em;
       }
     }
 
@@ -506,19 +540,15 @@ app.get('/op', (req, res) => {
 </head>
 <body>
 
-  ${isCancelled ? `
-    <div class="popup" id="popup">
-      <span class="popup-icon">❌</span>
-      <span>Class has been Cancelled</span>
+  <!-- Popup Modal -->
+  <div class="popup-modal" id="popupModal">
+    <div class="popup-content" id="popupContent">
+      <div class="popup-icon" id="popupIcon"></div>
+      <h2 id="popupTitle"></h2>
+      <p id="popupMessage"></p>
+      <button class="popup-close" onclick="closePopup()">Close</button>
     </div>
-  ` : ''}
-
-  ${isLiveSoon ? `
-    <div class="popup success" id="popup">
-      <span class="popup-icon">⏰</span>
-      <span>Class Will Be Live Soon</span>
-    </div>
-  ` : ''}
+  </div>
 
   <div class="container">
     <div class="card user-card">
@@ -545,9 +575,9 @@ app.get('/op', (req, res) => {
         <div class="value">${dateStr}</div>
       </div>
 
-      <a href="${class_url}" class="btn" target="_blank">📥 Download Class Video</a>
-      <a href="${slides_url}" class="btn btn-secondary" target="_blank">📄 Download Slides (PDF)</a>
-      <a href="${watchUrl}" class="btn btn-success" target="_blank">▶️ Watch Lecture Now</a>
+      <button class="btn" onclick="handleClick('download', '${class_url.replace(/'/g, "\\'")}')">📥 Download Class Video</button>
+      <button class="btn btn-secondary" onclick="handleClick('slides', '${slides_url.replace(/'/g, "\\'")}')">📄 Download Slides (PDF)</button>
+      <button class="btn btn-success" onclick="handleClick('watch', '${watchUrl.replace(/'/g, "\\'")}', '${class_url.replace(/'/g, "\\'")}', '${slides_url.replace(/'/g, "\\'")}')">▶️ Watch Lecture Now</button>
       <a href="https://studyuk.fun" class="btn btn-outline" target="_blank">🌐 Visit Website</a>
     </div>
   </div>
@@ -575,12 +605,45 @@ app.get('/op', (req, res) => {
     
     setInterval(updateTimer, 1000);
 
-    const popup = document.getElementById('popup');
-    if (popup) {
-      setTimeout(() => {
-        popup.style.display = 'none';
-      }, 5000);
+    function handleClick(type, url, classUrl, slidesUrl) {
+      // Check if Class Cancelled or Live Soon
+      if (type === 'download' || type === 'slides' || type === 'watch') {
+        const checkUrl = type === 'download' ? url : (type === 'slides' ? url : classUrl);
+        const checkSlides = type === 'watch' ? slidesUrl : null;
+        
+        if (checkUrl === 'Class Cancelled' || checkSlides === 'Class Cancelled') {
+          showPopup('❌', 'Class Cancelled', 'This class has been cancelled.', 'cancelled');
+          return;
+        }
+        
+        if (checkUrl === 'Live Soon' || checkSlides === 'Live Soon') {
+          showPopup('⏰', 'Live Soon', 'This class will be live soon!', 'live-soon');
+          return;
+        }
+      }
+      
+      // Open URL
+      window.open(url, '_blank');
     }
+
+    function showPopup(icon, title, message, cssClass) {
+      document.getElementById('popupIcon').textContent = icon;
+      document.getElementById('popupTitle').textContent = title;
+      document.getElementById('popupMessage').textContent = message;
+      document.getElementById('popupContent').className = 'popup-content ' + cssClass;
+      document.getElementById('popupModal').classList.add('active');
+    }
+
+    function closePopup() {
+      document.getElementById('popupModal').classList.remove('active');
+    }
+
+    // Close on outside click
+    document.getElementById('popupModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closePopup();
+      }
+    });
   </script>
 
 </body>
@@ -588,82 +651,159 @@ app.get('/op', (req, res) => {
   `);
 });
 
-// === /encrypt ===
-app.get('/encrypt', (req, res) => {
-  const sample = {
-    "class_name": "Magnetic Forces & Moving Charges",
-    "teacher_name": "Aditya Kumar Jha",
-    "live_at": "2025-08-23T15:30:00Z",
-    "thumbnail": "https://edge.uacdn.net/static/thumbnail/user/5704fa4cd18943cbbe9290533f9d55f4.jpg?q=100&w=512",
-    "class_url": "https://uamedia.uacdn.net/lesson-raw/763ASPDMEFJXRE2KPYZN/output.webm",
-    "slides_url": "https://player.uacdn.net/slides_pdf/763ASPDMEFJXRE2KPYZN/Magnetic_Forces__Moving_Charges_with_anno.pdf",
-    "is_offline": false,
-    "live_at_time": "2025-08-23T15:30:00+00:00",
-    "user_first_name": "HACKHET",
-    "user_id": 5748674252,
-    "made_at": new Date().toISOString()
-  };
+// === TELEGRAM POPUP PAGE ===
+function telegramPopupPage() {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Our Telegram</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  const encrypted = encrypt(sample);
-  const url = `https://dekhosekd-psll.onrender.com/op?data=${encrypted}`;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-  res.send(`
-    <!DOCTYPE html>
-    <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generated Link</title>
-    <style>
-      *{margin:0;padding:0;box-sizing:border-box}
-      body{font-family:Arial,sans-serif;background:#5e35b1;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-      .container{background:#fff;color:#333;padding:30px;border-radius:8px;max-width:700px;width:100%}
-      h2{margin-bottom:20px;font-size:1.8em;color:#5e35b1}
-      .link-box{background:#f5f5f5;border:1px solid #ddd;padding:15px;border-radius:5px;margin:20px 0;word-break:break-all;font-size:0.9em}
-      .link-box a{color:#5e35b1;font-weight:600;text-decoration:none}
-      .btn{padding:12px 25px;background:#5e35b1;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:600;margin:10px 5px;font-size:1em}
-      .btn:hover{background:#4527a0}
-      details{margin-top:20px;background:#f5f5f5;padding:15px;border-radius:5px;border:1px solid #ddd}
-      summary{cursor:pointer;font-weight:600;margin-bottom:10px;color:#5e35b1}
-      pre{background:#000;color:#0f0;padding:15px;border-radius:5px;overflow:auto;font-size:0.8em;margin-top:10px}
-    </style>
-    </head><body>
-    <div class="container">
-      <h2>🔐 Link Generated Successfully!</h2>
-      <div class="link-box">
-        <a href="${url}" target="_blank">${url}</a>
-      </div>
-      <button class="btn" onclick="navigator.clipboard.writeText('${url}');alert('Link Copied!')">📋 Copy Link</button>
-      <button class="btn" onclick="location.href='${url}'">🔗 Open Link</button>
-      <details>
-        <summary>View Encrypted Data</summary>
-        <pre>${encrypted}</pre>
-      </details>
+    .popup-box {
+      background: #fff;
+      padding: 50px 40px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .telegram-icon {
+      font-size: 5em;
+      margin-bottom: 20px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    p {
+      font-size: 1.2em;
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .telegram-btn {
+      display: inline-block;
+      padding: 15px 40px;
+      background: linear-gradient(135deg, #0088cc, #00aced);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.1em;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 136, 204, 0.4);
+    }
+
+    .telegram-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 136, 204, 0.6);
+    }
+
+    .telegram-btn:active {
+      transform: translateY(0);
+    }
+
+    .footer-text {
+      margin-top: 30px;
+      font-size: 0.9em;
+      color: #999;
+    }
+
+    @media (max-width: 768px) {
+      .popup-box {
+        padding: 40px 30px;
+      }
+
+      h1 {
+        font-size: 1.7em;
+      }
+
+      p {
+        font-size: 1.1em;
+      }
+
+      .telegram-icon {
+        font-size: 4em;
+      }
+
+      .telegram-btn {
+        padding: 14px 35px;
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="popup-box">
+    <div class="telegram-icon">📱</div>
+    <h1>Join Our Telegram Channel 🙂</h1>
+    <p>Stay updated with the latest classes, notes, and announcements!</p>
+    <a href="https://t.me/YourChannelHere" class="telegram-btn" target="_blank">
+      Join Now
+    </a>
+    <div class="footer-text">
+      Made with ❤️ by HACKHET
     </div>
-    </body></html>
-  `);
+  </div>
+</body>
+</html>
+  `;
+}
+
+// === / ROUTE - TELEGRAM POPUP ===
+app.get('/', (req, res) => {
+  res.send(telegramPopupPage());
 });
 
-// === Home ===
-app.get('/', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dekho Sekd Opener</title>
-    <style>
-      *{margin:0;padding:0;box-sizing:border-box}
-      body{font-family:Arial,sans-serif;background:#5e35b1;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
-      .box{background:#fff;color:#333;padding:50px 40px;border-radius:8px;max-width:500px;width:100%}
-      h1{font-size:2.2em;margin-bottom:15px;color:#5e35b1}
-      p{font-size:1.1em;margin-bottom:30px;color:#666}
-      .btn{padding:15px 40px;background:#5e35b1;color:#fff;border:none;border-radius:5px;font-weight:bold;font-size:1em;cursor:pointer;text-decoration:none;display:inline-block}
-      .btn:hover{background:#4527a0}
-    </style></head>
-    <body>
-      <div class="box">
-        <h1>🎓 Dekho Sekd Opener</h1>
-        <p>Generate & Share Class Links Securely</p>
-        <a href="/encrypt" class="btn">Generate New Link</a>
-      </div>
-    </body></html>
-  `);
+// === /encrypt ROUTE - TELEGRAM POPUP ===
+app.get('/encrypt', (req, res) => {
+  res.send(telegramPopupPage());
 });
 
 app.listen(port, () => {
