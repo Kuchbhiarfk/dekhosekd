@@ -228,8 +228,8 @@ app.get('/op', (req, res) => {
   }
 
   const watchUrl = is_offline
-    ? `https://studyuk.fun/sdv.html?url=${encodeURIComponent(class_url)}&title=${encodeURIComponent(class_name)}`
-    : `https://studyuk.fun/umplayer.html?playurl=${encodeURIComponent(class_url)}&pdf=${encodeURIComponent(slides_url)}`;
+    ? `https://bhundacademy-offline.pages.dev/?url=${encodeURIComponent(class_url)}&title=${encodeURIComponent(class_name)}`
+    : `https://bhundacademy-online.pages.dev/?playurl=${encodeURIComponent(class_url)}&pdf=${encodeURIComponent(slides_url)}`;
 
   // === FULL HTML - WITH POPUP LOGIC ===
   res.send(`
