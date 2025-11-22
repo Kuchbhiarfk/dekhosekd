@@ -221,7 +221,7 @@ app.get('/op', (req, res) => {
           <h1>⏰ Link Expired!</h1>
           <p>This link is no longer valid.</p>
           <p>Please generate a new link.</p>
-          <button class="btn" onclick="location.href='https://studyuk.fun'">Go to Website</button>
+          <button class="btn" onclick="location.href='https://bhundacademy.pages.dev/'">Go to Website</button>
         </div>
       </body></html>
     `);
@@ -578,12 +578,12 @@ app.get('/op', (req, res) => {
       <button class="btn" onclick="handleClick('download', '${class_url.replace(/'/g, "\\'")}')">📥 Download Class Video</button>
       <button class="btn btn-secondary" onclick="handleClick('slides', '${slides_url.replace(/'/g, "\\'")}')">📄 Download Slides (PDF)</button>
       <button class="btn btn-success" onclick="handleClick('watch', '${watchUrl.replace(/'/g, "\\'")}', '${class_url.replace(/'/g, "\\'")}', '${slides_url.replace(/'/g, "\\'")}')">▶️ Watch Lecture Now</button>
-      <a href="https://studyuk.fun" class="btn btn-outline" target="_blank">🌐 Visit Website</a>
+      <a href="https://bhundacademy.pages.dev/" class="btn btn-outline" target="_blank">🌐 Visit Website</a>
     </div>
   </div>
 
   <div class="footer">
-    Made with ❤️ by HACKHET | Powered by StudyUK
+    Made with ❤️ by Bhundacademy
   </div>
 
   <script>
@@ -783,12 +783,12 @@ function telegramPopupPage() {
   <div class="popup-box">
     <div class="telegram-icon">📱</div>
     <h1>Join Our Telegram Channel 🙂</h1>
-    <p>Stay updated with the latest classes, notes, and announcements!</p>
-    <a href="https://t.me/YourChannelHere" class="telegram-btn" target="_blank">
+    <p>Stay updated with the latest announcements!</p>
+    <a href="https://t.me/BHUNDACADEMY_UPDATES" class="telegram-btn" target="_blank">
       Join Now
     </a>
     <div class="footer-text">
-      Made with ❤️ by HACKHET
+      Made with ❤️ by BHUNDACADEMY
     </div>
   </div>
 </body>
